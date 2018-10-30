@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -64,4 +65,6 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "by author name"))
         self.label_3.setText(_translate("MainWindow", "Your Reading Statistics"))
         self.toolButton.setText(_translate("MainWindow", "..."))
+        
+
 

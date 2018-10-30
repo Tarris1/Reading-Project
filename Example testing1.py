@@ -7,7 +7,8 @@ Created on Tue Oct 30 18:10:10 2018
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QGridLayout, QLabel, QLineEdit
-                             , QMessageBox, QPushButton, QTextEdit, QVBoxLayout, QWidget, QTableView, QTableWidget,QTableWidgetItem)
+                             , QMessageBox, QPushButton, QTextEdit, QVBoxLayout
+                             , QWidget, QTableView, QTableWidget,QTableWidgetItem, QApplication, QMainWindow)
 
 
 
@@ -31,10 +32,9 @@ class AddressBook(QWidget):
         buttonLayout1 = QVBoxLayout()
         buttonLayout1.addWidget(self.addButton, Qt.AlignTop)
         
-        self.tableWidget = QTableWidget()
-        self.tableWidget.setRowCount(2) #Sets # rows
-        self.tableWidget.setColumnCount(4)
-        self.tableWidget.setItem(X,Y, QTableWidgetItem("TEXT"))
+        table = QTableWidget(3, 3,self)  # create 3x3 table
+        table.setHorizontalHeaderLabels(('Col 1', 'Col 2', 'Col 3'))
+        table.setVerticalHeaderLabels(('Row 1', 'Row 2', 'Row 3'))
         
 
         mainLayout = QGridLayout()
@@ -44,6 +44,8 @@ class AddressBook(QWidget):
         mainLayout.addWidget(self.authorText, 1, 1)
         mainLayout.addWidget(statLabel,0,2)
         mainLayout.addLayout(buttonLayout1, 2, 1)
+        
+        
         
 
         self.setLayout(mainLayout)
