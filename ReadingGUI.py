@@ -14,24 +14,21 @@ from PyQt5.QtCore import pyqtSlot
 
 class ReadingApp(QMainWindow):
     def __init__(self):
+        
         super().__init__()
         
         self.initUI()
         
     def initUI(self):
         
-        btn_progress = QPushButton('Update Progress', self)
+        btn_progress = QPushButton('Update Progress', self) 
         btn_progress.setToolTip('Update your reading progress')
-        btn_progress.resize(btn_progress.sizeHint())
         btn_add_books = QPushButton('Add a New Book', self)
         btn_add_books.setToolTip ('Add a new book to your shelf')
-        btn_add_books.resize(btn_add_books.sizeHint())
-        
         
         hbox = QHBoxLayout()
         hbox.addWidget(btn_progress)
         hbox.addWidget(btn_add_books)
-        
         
         vbox = QVBoxLayout() 
         vbox.addStretch(1)
