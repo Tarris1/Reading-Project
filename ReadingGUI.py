@@ -7,7 +7,8 @@ Created on Tue Oct 30 19:27:49 2018
 
 import sys
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget,
-                             QAction, QTableWidget,QTableWidgetItem,QVBoxLayout, QLabel, QLineEdit, QPushButton)
+                             QAction, QTableWidget,QTableWidgetItem,QVBoxLayout,
+                             QLabel, QLineEdit, QPushButton, qApp)
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
 
@@ -19,7 +20,7 @@ class ReadingApp(QMainWindow):
         
     def initUI(self):
         self.setWindowTitle("My Reading App")
-        self.statusBar().showMessage('Ready')
+        
         self.left = 50
         self.top = 100
         self.width = 1000
@@ -34,8 +35,22 @@ class ReadingApp(QMainWindow):
         btn_add_books.resize(btn.sizeHint())
         btn_add_books.move(50, self.height-100) #Add the bottom of the app
         
+        exitAct = QAction(QIcon('exit.png'), '&Exit', self)
+        exitAct.setShortcut('Ctrl+Q') #Short cut for exiting app
+        exitAct.setStatusTip('Exit application') #When hovering over exit option, show message
+        exitAct.triggered.connect(qApp.quit) #Adds the function to the menu option
         
- 
+        saveFile = QAction(QIcon('save.png'), '&Save', self)
+        saveFile.setShortcut('Ctrl+S')
+        saveFile.setStatusTip('Save your data')
+        
+        self.statusBar()
+        
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(saveFile)
+        fileMenu.addAction(exitAct)
+        
         # Show widget
         self.show()
     
