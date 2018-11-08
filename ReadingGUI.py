@@ -19,7 +19,7 @@ class ReadingApp(QMainWindow):
         self.initUI()
         
     def initUI(self):
-        self.setWindowTitle("My Reading App")
+        self.setWindowTitle("Reading & Me")
         
         self.left = 50
         self.top = 100
@@ -35,7 +35,7 @@ class ReadingApp(QMainWindow):
         btn_add_books.resize(btn.sizeHint())
         btn_add_books.move(50, self.height-100) #Add the bottom of the app
         
-        exitAct = QAction(QIcon('exit.png'), '&Exit', self)
+        exitAct = QAction(QIcon('exit24.png'), '&Exit', self)
         exitAct.setShortcut('Ctrl+Q') #Short cut for exiting app
         exitAct.setStatusTip('Exit application') #When hovering over exit option, show message
         exitAct.triggered.connect(qApp.quit) #Adds the function to the menu option
@@ -52,6 +52,8 @@ class ReadingApp(QMainWindow):
         fileMenu.addAction(exitAct)
         
         # Show widget
+        self.setWindowIcon(QIcon('readinglogo.jpg'))
+        
         self.show()
     
     
