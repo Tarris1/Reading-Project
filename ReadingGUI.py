@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget,
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
 
-class ReadingApp(QWidget):
+class ReadingApp(QMainWindow):
     def __init__(self):
         super().__init__()
         
@@ -19,6 +19,7 @@ class ReadingApp(QWidget):
         
     def initUI(self):
         self.setWindowTitle("My Reading App")
+        self.statusBar().showMessage('Ready')
         self.left = 50
         self.top = 100
         self.width = 1000
