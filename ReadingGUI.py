@@ -9,7 +9,7 @@ import sys
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget,
                              QAction, QTableWidget,QTableWidgetItem,QVBoxLayout, QHBoxLayout,
                              QLabel, QLineEdit, QPushButton, 
-                             qApp, QInputDialog, QFileDialog, QTextEdit)
+                             qApp, QInputDialog, QFileDialog, QTextEdit, QComboBox)
                              
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
@@ -23,23 +23,28 @@ class ReadingApp(QMainWindow):
         
     def initUI(self):
         
-        btn_progress = QPushButton('Update Progress', self) 
-        btn_progress.setToolTip('Update your reading progress')
-        btn_add_books = QPushButton('Add a New Book', self)
-        btn_add_books.setToolTip ('Add a new book to your shelf')
-        btn_add_books.clicked.connect (self.showDialog) #Opens up a dialog where you can "add" books
+        self.btn_progress = QPushButton('Update Progress', self) 
+        self.btn_progress.setToolTip('Update your reading progress')
+        self.btn_add_books = QPushButton('Add a New Book', self)
+        self.btn_add_books.setToolTip ('Add a new book to your shelf')
+        self.btn_add_books.clicked.connect (self.showDialog) #Opens up a dialog where you can "add" books
         
         self.added_book = QLabel('', self)
         
         self.addNotes = QTextEdit() #
         
+        self.combo = QComboBox(self) ###May be useful for selecting book "currently reading"
+        self.combo.addItem("Book1")
+        self.combo.activated[str].connect(self.onActivated) 
+        
         hbox = QHBoxLayout()
-        hbox.addWidget(btn_progress)
-        hbox.addWidget(btn_add_books)
+        hbox.addWidget(self.btn_progress)
+        hbox.addWidget(self.btn_add_books)
         
         vbox = QVBoxLayout() 
         vbox.addWidget(self.addNotes)
         vbox.addStretch(1)
+        vbox.addWidget(self.combo)
         vbox.addLayout(hbox)
         vbox.addWidget(self.added_book) #Is aded below the horizontal book
         
@@ -91,6 +96,7 @@ class ReadingApp(QMainWindow):
         if ok:
             self.added_book.setText("You have just added " + str(text) + " to your reading list") 
             #Sets text of QLabel
+            self.combo.addItem(str(text)) ###Adds another menu for added book.
             
     def openFileDialog(self): #Opens the dialog and reads the existing data in the specific file
                                 #Currently only reads txt files with character limitations
@@ -102,6 +108,11 @@ class ReadingApp(QMainWindow):
             with f:
                 data = f.read()
                 self.addNotes.setText(data)   
+                
+    def onActivated(self, text):
+    
+        self.btn_progress.setText("Update the progress of: " + text)
+        
     
 
 if __name__ == '__main__':
