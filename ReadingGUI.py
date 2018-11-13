@@ -23,6 +23,7 @@ class ReadingApp(QMainWindow):
         
     def initUI(self):
         
+        
         self.btn_progress = QPushButton('Update Progress', self) #Add Progress button
         self.btn_progress.setToolTip('Update your reading progress')
         
@@ -32,6 +33,7 @@ class ReadingApp(QMainWindow):
         self.btn_add_books.clicked.connect(self.addBooksFunc)
         
         self.added_book = QLabel('', self) #Label indicating added book 
+        self.allBooks = QLabel('', self)
         
         self.add_booksLbl = QLabel("Enter the details of a new book below:")
         #self.addNotes = QTextEdit() #
@@ -82,6 +84,7 @@ class ReadingApp(QMainWindow):
         tab1.setLayout(vbox)
         
         
+        
         exitAct = QAction(QIcon('exit24.png'), '&Exit', self)
         exitAct.setShortcut('Ctrl+Q') #Short cut for exiting app
         exitAct.setStatusTip('Exit application') #When hovering over exit option, show message
@@ -96,10 +99,15 @@ class ReadingApp(QMainWindow):
         openFile.setStatusTip('Open new File')
         openFile.triggered.connect(self.openFileDialog)
         
+        newFile = QAction(QIcon('new.png'), '&New', self)
+        newFile.setShortcut('Ctrl+N')
+        newFile.triggered.connect(self.newShelf)
+        
         self.statusBar()
         
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(newFile)
         fileMenu.addAction(openFile)
         fileMenu.addAction(saveFile)
         fileMenu.addAction(exitAct)
@@ -114,6 +122,8 @@ class ReadingApp(QMainWindow):
         self.height = self.width
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.setWindowTitle("Reading & Me")
+        
+        
         
         self.show()
     
@@ -145,18 +155,35 @@ class ReadingApp(QMainWindow):
         
     def addBooksFunc(self):
         '''Adds book to combo widget and changes label at the bottom to indicate added book'''
-        '''Also adds these details to data file ###To be added####'''
-        title = self.addTitle.text()
-        author = self.addAuthor.text()
-        if title != "":
-            if author != "":
-                self.added_book.setText("You have just added " + str(title) + " by " + str(author) +
+        '''Also adds these details to a data file'''
+        title_new = self.addTitle.text()
+        author_new = self.addAuthor.text()
+        pages_new = self.addPages.text()
+        if len(self.bookShelf) == 0:
+            id_num = 1000000
+        else:
+            id_num = self.bookShelf[len(self.bookShelf)-1]["id"]+1
+            
+            
+        if title_new != "": ###Requires both Author and Book Title, if not, return message
+            if author_new != "":
+                self.added_book.setText("You have just added " + str(title_new) + " by " + 
+                                        str(author_new) +
                                         " to your reading list")
-                self.combo.addItem(str(title))
+                self.combo.addItem(str(title_new))
+                newBookEntry = {"id": id_num, "title": title_new, "author": author_new, "pages": pages_new}
+                self.bookShelf.append(newBookEntry)
             else:
                 self.added_book.setText("Please add the author")
         else:
             self.added_book.setText("Please add a title")
+        #print (self.bookShelf)
+            
+    def newShelf(self):
+        self.bookShelf = []
+        self.added_book.setText("Please add a book using the inputs above")
+            
+        
         
     
 
