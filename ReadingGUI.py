@@ -23,7 +23,9 @@ class ReadingApp(QMainWindow):
         
     def initUI(self):
         
+        self.bookShelf = [] #Ensure that a bookShelf exists
         
+        ##################Widgets##################
         self.btn_progress = QPushButton('Update Progress', self) #Add Progress button
         self.btn_progress.setToolTip('Update your reading progress')
         
@@ -33,7 +35,6 @@ class ReadingApp(QMainWindow):
         self.btn_add_books.clicked.connect(self.addBooksFunc)
         
         self.added_book = QLabel('', self) #Label indicating added book 
-        self.allBooks = QLabel('', self)
         
         self.add_booksLbl = QLabel("Enter the details of a new book below:")
         #self.addNotes = QTextEdit() #
@@ -51,7 +52,6 @@ class ReadingApp(QMainWindow):
         AuthorHbox.addWidget(self.addAuthorLbl)
         
         self.addPages = QLineEdit()
-        self.addPages.resize(50,20)
         self.addPagesLbl = QLabel("Pages", self)
         PagesHbox = QHBoxLayout()
         PagesHbox.addWidget(self.addPages)
@@ -83,8 +83,9 @@ class ReadingApp(QMainWindow):
         self.setCentralWidget(tab1)
         tab1.setLayout(vbox)
         
+        ####################
         
-        
+        ###MenuBar#######
         exitAct = QAction(QIcon('exit24.png'), '&Exit', self)
         exitAct.setShortcut('Ctrl+Q') #Short cut for exiting app
         exitAct.setStatusTip('Exit application') #When hovering over exit option, show message
@@ -111,9 +112,9 @@ class ReadingApp(QMainWindow):
         fileMenu.addAction(openFile)
         fileMenu.addAction(saveFile)
         fileMenu.addAction(exitAct)
+        ###########################
         
-        
-        # Show widget
+        #Show widgets
         self.setWindowIcon(QIcon('readinglogo.jpg'))
         
         self.left = 50
@@ -122,7 +123,6 @@ class ReadingApp(QMainWindow):
         self.height = self.width
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.setWindowTitle("Reading & Me")
-        
         
         
         self.show()
@@ -162,7 +162,7 @@ class ReadingApp(QMainWindow):
         if len(self.bookShelf) == 0:
             id_num = 1000000
         else:
-            id_num = self.bookShelf[len(self.bookShelf)-1]["id"]+1
+            id_num = self.bookShelf[len(self.bookShelf)-1]["id"]+1 #Adds appropraite id to new book
             
             
         if title_new != "": ###Requires both Author and Book Title, if not, return message
@@ -181,7 +181,7 @@ class ReadingApp(QMainWindow):
             
     def newShelf(self):
         self.bookShelf = []
-        self.added_book.setText("Please add a book using the inputs above")
+        self.added_book.setText("Please add books to your new bookshelf.")
             
         
         
