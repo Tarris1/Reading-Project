@@ -141,8 +141,9 @@ class ReadingApp(QMainWindow):
             #Sets text of QLabel
             self.combo.addItem(str(text)) ###Adds another menu for added book.
             
-    def openFileDialog(self): #Opens the dialog and reads the existing data in the specific file
-                                #Currently only reads txt files with character limitations
+    def openFileDialog(self): 
+        '''Opens a Goodreads shelf, extracts book id, title, author, page number,
+        publication year, ISBN, ISBN13'''
         fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
 
         if fname[0]:
@@ -160,13 +161,19 @@ class ReadingApp(QMainWindow):
                         line_count += 1
                         id_num = (f'{row["Book Id"]}')
                         title = f'{row["Title"]}'
+                        self.combo.addItem(str(title))
                         author = f'{row["Author"]}'
                         pages = f'{row["Number of Pages"]}'
                         year = f'{row["Original Publication Year"]}'
+                        ISBN = f'{row["ISBN"]}'
+                        ISBN13 = f'{row["ISBN13"]}'
+                        index = line_count-1
                         book_dict = {"id_num" : id_num, "title" : title, "author" : author, "pages" : pages,
-                         "year" : year}
-                        self.bookShelf.append(book_dict)
+                         "year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index}
+                        self.bookShelf.append(book_dict) #Adds to combo bar
                 print(f'Processed {line_count} lines.')
+                
+        
                 
     def onActivated(self, text):
     
@@ -179,7 +186,7 @@ class ReadingApp(QMainWindow):
         author_new = self.addAuthor.text()
         pages_new = self.addPages.text()
         if len(self.bookShelf) == 0:
-            id_num = 1000000
+            id_num = 1
         else:
             id_num = self.bookShelf[len(self.bookShelf)-1]["id"]+1 #Adds appropraite id to new book
             
