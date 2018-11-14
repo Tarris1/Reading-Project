@@ -6,6 +6,7 @@ Created on Tue Oct 30 19:27:49 2018
 """
 
 import sys
+import csv
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget,
                              QAction, QTableWidget,QTableWidgetItem,QVBoxLayout, QHBoxLayout,
                              QLabel, QLineEdit, QPushButton, QTabWidget,
@@ -101,8 +102,9 @@ class ReadingApp(QMainWindow):
         openFile.setStatusTip('Open new File')
         openFile.triggered.connect(self.openFileDialog)
         
-        newFile = QAction(QIcon('new.png'), '&New', self)
+        newFile = QAction(QIcon('new_file.jpg'), '&New', self)
         newFile.setShortcut('Ctrl+N')
+        newFile.setStatusTip ('Create a new bookshelf')
         newFile.triggered.connect(self.newShelf)
         
         self.statusBar()
@@ -144,11 +146,27 @@ class ReadingApp(QMainWindow):
         fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
 
         if fname[0]:
-            f = open(fname[0], 'r')
+            with open(fname[0], mode='r', encoding="utf8") as csv_file:
 
-            with f:
-                data = f.read()
-                self.addNotes.setText(data)   
+                csv_reader = csv.DictReader(csv_file)
+                line_count = 0
+                for row in csv_reader:
+                    if line_count == 0:
+                        col_names = (f'Column names are {", ".join(row)}')
+                        print (col_names)
+                        line_count += 1
+                    else:
+            #print(f'\t{row["Book Id"]} works in the {row["Title"]} department, and was born in {row["Author"]}.')
+                        line_count += 1
+                        id_num = (f'{row["Book Id"]}')
+                        title = f'{row["Title"]}'
+                        author = f'{row["Author"]}'
+                        pages = f'{row["Number of Pages"]}'
+                        year = f'{row["Original Publication Year"]}'
+                        book_dict = {"id_num" : id_num, "title" : title, "author" : author, "pages" : pages,
+                         "year" : year}
+                        self.bookShelf.append(book_dict)
+                print(f'Processed {line_count} lines.')
                 
     def onActivated(self, text):
     
