@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget,
                              qApp, QInputDialog, QFileDialog, QTextEdit, QComboBox)
                              
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, QDateTime
 
 class ReadingApp(QMainWindow):
     def __init__(self):
@@ -24,10 +24,12 @@ class ReadingApp(QMainWindow):
     def initUI(self):
         
         self.bookShelf = [] #Ensure that a bookShelf exists
+        self.updates = []
         
         ##################Widgets##################
         self.btn_progress = QPushButton('Update Progress', self) #Add Progress button
         self.btn_progress.setToolTip('Update your reading progress')
+        self.btn_progress.clicked.connect(self.addProgress)
         
         self.btn_add_books = QPushButton('Add a New Book', self) ###Add a new Book button
         self.btn_add_books.setToolTip ('Add a new book to your shelf')
@@ -39,6 +41,7 @@ class ReadingApp(QMainWindow):
         self.add_booksLbl = QLabel("Enter the details of a new book below:")
         #self.addNotes = QTextEdit() #
         
+        #Entry lines and labels
         self.addTitle = QLineEdit()
         self.addTitleLbl = QLabel("Title",self)
         titleHbox = QHBoxLayout()
@@ -59,7 +62,6 @@ class ReadingApp(QMainWindow):
         
         #Choose book to update progress on
         self.combo = QComboBox(self) 
-        self.combo.addItem("Book1")
         self.combo.activated[str].connect(self.onActivated) 
         
         ProgresshBox = QHBoxLayout()
@@ -82,7 +84,6 @@ class ReadingApp(QMainWindow):
         tab1 = QWidget(self) #First Tab
         self.setCentralWidget(tab1)
         tab1.setLayout(vbox)
-        
         ####################
         
         ###MenuBar#######
@@ -183,8 +184,25 @@ class ReadingApp(QMainWindow):
         self.bookShelf = []
         self.added_book.setText("Please add books to your new bookshelf.")
             
+    def addProgress(self, index):
+        '''Requests new page number in dialog, adds new page number with book id, 
+        title and date to new dictionary entry. Prints the update to console and changes label'''
+        text, ok = QInputDialog.getText(self, 'Input Dialog',  #Dialog title, Dialog message
+            'Enter new page:') #Returns text and a boolean value (TRUE or FALSE)
         
+        if ok:
+            self.added_book.setText("You are now on page " + str(text) + " of " + 
+                                    str(self.combo.itemText(index))) 
+            #Sets text of QLabel
         
+            datetime = QDateTime.currentDateTime()
+            for i in range(len(self.bookShelf)):
+                if "title" in self.bookShelf[i]:
+                    id_bookUpdated = (self.bookShelf[i]["id"])
+            added_update = {"date": datetime, "id": id_bookUpdated, "title": self.combo.itemText(index),
+                            "progress": text}
+            print (added_update)
+            self.updates.append(added_update)
     
 
 if __name__ == '__main__':
