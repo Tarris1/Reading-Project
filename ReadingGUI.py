@@ -218,18 +218,19 @@ class ReadingApp(QMainWindow):
             'Enter new page:') #Returns text and a boolean value (TRUE or FALSE)
         
         if ok:
+            bookToUpdate = str(self.combo.currentText())
             self.added_book.setText("You are now on page " + str(text) + " of " + 
-                                    str(self.combo.itemText(index))) 
+                                    bookToUpdate) 
             #Sets text of QLabel
         
             datetime = QDateTime.currentDateTime()
             for i in range(len(self.bookShelf)):
-                if "title" in self.bookShelf[i]:
+                if self.bookShelf[i]["Title"] == bookToUpdate:
                     id_bookUpdated = (self.bookShelf[i]["id"])
-            added_update = {"date": datetime, "id": id_bookUpdated, "title": self.combo.itemText(index),
+                    added_update = {"date": datetime, "id": id_bookUpdated, "Title": bookToUpdate,
                             "progress": text}
-            print (added_update)
-            self.updates.append(added_update)
+                    self.updates.append(added_update)
+            print (self.updates)
             
     def saveBookShelf(self):
         save = QFileDialog.getSaveFileName(self, 'Save file', '/home')
