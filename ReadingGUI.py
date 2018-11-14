@@ -96,6 +96,7 @@ class ReadingApp(QMainWindow):
         saveFile = QAction(QIcon('save.png'), '&Save', self)
         saveFile.setShortcut('Ctrl+S')
         saveFile.setStatusTip('Save your data')
+        saveFile.triggered.connect(self.saveBookShelf)
         
         openFile = QAction(QIcon('open.png'), 'Open', self)
         openFile.setShortcut('Ctrl+O')
@@ -168,8 +169,9 @@ class ReadingApp(QMainWindow):
                         ISBN = f'{row["ISBN"]}'
                         ISBN13 = f'{row["ISBN13"]}'
                         index = line_count-1
-                        book_dict = {"id_num" : id_num, "title" : title, "author" : author, "pages" : pages,
-                         "year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index}
+                        book_dict = {"Book Id" : id_num, "Title" : title, "Author" : author, 
+                                     "Number of Pages" : pages,
+                         "Original Publication Year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index}
                         self.bookShelf.append(book_dict) #Adds to combo bar
                 print(f'Processed {line_count} lines.')
                 
@@ -228,6 +230,18 @@ class ReadingApp(QMainWindow):
                             "progress": text}
             print (added_update)
             self.updates.append(added_update)
+            
+    def saveBookShelf(self):
+        save = QFileDialog.getSaveFileName(self, 'Save file', '/home')
+        
+        if save[0]:
+            with open(save[0]+'.csv', mode='w', encoding = "utf8") as csv_file:
+                fieldnames = ['id', 'Book Id', 'Title', 'Author', 'Number of Pages', 
+                              'Original Publication Year', 'ISBN', 'ISBN13']
+                writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+                writer.writeheader()
+                for i in range(len(self.bookShelf)):
+                    writer.writerow(self.bookShelf[i])
     
 
 if __name__ == '__main__':
