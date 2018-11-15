@@ -10,7 +10,7 @@ import csv
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget,
                              QAction, QTableWidget,QTableWidgetItem,QVBoxLayout, QHBoxLayout,
                              QLabel, QLineEdit, QPushButton, QTabWidget,
-                             qApp, QInputDialog, QFileDialog, QTextEdit, QComboBox)
+                             qApp, QInputDialog, QFileDialog, QTextEdit, QComboBox, QShortcut)
                              
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot, QDateTime
@@ -36,6 +36,7 @@ class ReadingApp(QMainWindow):
         self.btn_add_books = QPushButton('Add a New Book', self) ###Add a new Book button
         self.btn_add_books.setToolTip ('Add a new book to your shelf')
         #self.btn_add_books.clicked.connect (self.showDialog) #Opens up a dialog where you can "add" books
+        self.btn_add_books.setShortcut('Ctrl+E')
         self.btn_add_books.clicked.connect(self.addBooksFunc)
         
         self.added_book = QLabel('', self) #Label indicating added book 
@@ -62,6 +63,9 @@ class ReadingApp(QMainWindow):
         PagesHbox.addWidget(self.addPages)
         PagesHbox.addWidget(self.addPagesLbl)
         
+        self.bookStatus = QComboBox(self)
+        self.bookStatus.addItems(["To-read", "Currently Reading", "Read"])
+        
         #Choose book to update progress on
         self.combo = QComboBox(self) 
         self.combo.activated[str].connect(self.onActivated) 
@@ -71,13 +75,14 @@ class ReadingApp(QMainWindow):
         ProgresshBox.addWidget(self.combo)
         ProgresshBox.addWidget(self.btn_progress)
         
-        #####Add first tab, add books or add progress + books currently reading
+        
         vbox = QVBoxLayout() 
         #vbox.addWidget(self.addNotes)
         vbox.addWidget(self.add_booksLbl)
         vbox.addLayout(titleHbox)
         vbox.addLayout(AuthorHbox)
         vbox.addLayout(PagesHbox)
+        vbox.addWidget (self.bookStatus) #Combo box for shelf
         vbox.addWidget(self.btn_add_books)
         vbox.addWidget(self.added_book) 
         vbox.addStretch(1)
@@ -169,13 +174,14 @@ class ReadingApp(QMainWindow):
                         year = f'{row["Original Publication Year"]}'
                         ISBN = f'{row["ISBN"]}'
                         ISBN13 = f'{row["ISBN13"]}'
+                        Bookshelves = f'{row["Bookshelves"]}'
                         self.combo.addItem(str(title))
                         if self.combo.count()>0:
                             index = self.combo.count()+1
                         else:
                             index = line_count-1
                         book_dict = {"Book Id" : id_num, "Title" : title, "Author" : author, 
-                                     "Number of Pages" : pages,
+                                     "Number of Pages" : pages, "Bookshelves" : Bookshelves,
                          "Original Publication Year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index}
                         self.bookShelf.append(book_dict) #Adds to combo bar
                 print(f'Processed {line_count} lines.')
@@ -198,18 +204,19 @@ class ReadingApp(QMainWindow):
             id_num = self.bookShelf[len(self.bookShelf)-1]["id"]+1 #Adds appropraite id to new book
             
             
-        if title_new != "": ###Requires both Author and Book Title, if not, return message
-            if author_new != "":
-                self.added_book.setText("You have just added " + str(title_new) + " by " + 
+        if title_new != "" and author_new != "" and self.bookStatus.currentText() != "": ###Requires both Author and Book Title, if not, return message
+            #if author_new != "":
+            self.added_book.setText("You have just added " + str(title_new) + " by " + 
                                         str(author_new) +
                                         " to your reading list")
-                self.combo.addItem(str(title_new))
-                
-                newBookEntry = {"id": id_num, "Title": title_new, "Author": author_new, "Number of Pages": pages_new}
-                self.bookShelf.append(newBookEntry)
-            else:
-                self.added_book.setText("Please add the author")
-        else:
+            self.combo.addItem(str(title_new))
+            bookStatus = self.bookStatus.currentText()
+            newBookEntry = {"id": id_num, "Title": title_new, "Author": author_new, 
+                                "Number of Pages": pages_new, "Bookshelves": bookStatus}
+            self.bookShelf.append(newBookEntry)
+        elif title_new == "" and author_new != "":
+            self.added_book.setText("Please add the author")
+        elif title_new != "" and author_new == "":
             self.added_book.setText("Please add a title")
         
             
@@ -229,6 +236,8 @@ class ReadingApp(QMainWindow):
         title and date to new dictionary entry. Prints the update to console and changes label'''
         bookToUpdate = str(self.combo.currentText())
         InputText = ""
+        datetime = QDateTime.currentDateTime()
+        #datetime = datetime.toString()
         
         if len(bookToUpdate)==0:
             InputText = "You have no book to update"
@@ -244,7 +253,7 @@ class ReadingApp(QMainWindow):
                                     bookToUpdate) 
             #Sets text of QLabel
         
-            datetime = QDateTime.currentDateTime()
+            #datetime = QDateTime.currentDateTime()
             for i in range(len(self.bookShelf)):
                 if self.bookShelf[i]["Title"] == bookToUpdate:
                     id_bookUpdated = (self.bookShelf[i]["id"])
