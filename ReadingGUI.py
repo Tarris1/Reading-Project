@@ -162,13 +162,16 @@ class ReadingApp(QMainWindow):
                         line_count += 1
                         id_num = (f'{row["Book Id"]}')
                         title = f'{row["Title"]}'
-                        self.combo.addItem(str(title))
                         author = f'{row["Author"]}'
                         pages = f'{row["Number of Pages"]}'
                         year = f'{row["Original Publication Year"]}'
                         ISBN = f'{row["ISBN"]}'
                         ISBN13 = f'{row["ISBN13"]}'
-                        index = line_count-1
+                        self.combo.addItem(str(title))
+                        if self.combo.count()>0:
+                            index = self.combo.count()+1
+                        else:
+                            index = line_count-1
                         book_dict = {"Book Id" : id_num, "Title" : title, "Author" : author, 
                                      "Number of Pages" : pages,
                          "Original Publication Year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index}
@@ -178,7 +181,7 @@ class ReadingApp(QMainWindow):
         
                 
     def onActivated(self, text):
-    
+        
         self.btn_progress.setText("Update the progress of: " + text)
         
     def addBooksFunc(self):
@@ -199,6 +202,7 @@ class ReadingApp(QMainWindow):
                                         str(author_new) +
                                         " to your reading list")
                 self.combo.addItem(str(title_new))
+                
                 newBookEntry = {"id": id_num, "Title": title_new, "Author": author_new, "Number of Pages": pages_new}
                 self.bookShelf.append(newBookEntry)
             else:
@@ -208,8 +212,13 @@ class ReadingApp(QMainWindow):
         #print (self.bookShelf)
             
     def newShelf(self):
+        '''Clears the bookshelf list, tells the user that shelf is cleared if a bookshelf existed before,
+        else tells the user that a bookshelf, clears combo box'''
         self.bookShelf = []
-        self.added_book.setText("Please add books to your new bookshelf.")
+        if len(self.combo.currentText()) >0:
+            self.added_book.setText("Your shelf is now cleared. Please add books")
+        else:
+            self.added_book.setText("A bookshelf has been created. Please add books to your new bookshelf.")
         self.combo.clear()
         
             
@@ -235,6 +244,7 @@ class ReadingApp(QMainWindow):
             print (self.updates)
             
     def saveBookShelf(self):
+        '''Saves bookshelf to selected folder as a CSV file'''
         save = QFileDialog.getSaveFileName(self, 'Save file', '/home')
         
         if save[0]:
