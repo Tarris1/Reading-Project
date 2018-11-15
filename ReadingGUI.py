@@ -32,6 +32,7 @@ class ReadingApp(QMainWindow):
         self.btn_progress.setToolTip('Update your reading progress')
         self.btn_progress.clicked.connect(self.addProgress)
         
+        
         self.btn_add_books = QPushButton('Add a New Book', self) ###Add a new Book button
         self.btn_add_books.setToolTip ('Add a new book to your shelf')
         #self.btn_add_books.clicked.connect (self.showDialog) #Opens up a dialog where you can "add" books
@@ -64,6 +65,7 @@ class ReadingApp(QMainWindow):
         #Choose book to update progress on
         self.combo = QComboBox(self) 
         self.combo.activated[str].connect(self.onActivated) 
+        
         
         ProgresshBox = QHBoxLayout()
         ProgresshBox.addWidget(self.combo)
@@ -98,12 +100,12 @@ class ReadingApp(QMainWindow):
         saveFile.setStatusTip('Save your data')
         saveFile.triggered.connect(self.saveBookShelf)
         
-        openFile = QAction(QIcon('open.png'), 'Open', self)
+        openFile = QAction(QIcon('open.png'), 'Import a bookshelf from Goodreads', self)
         openFile.setShortcut('Ctrl+O')
         openFile.setStatusTip('Open new File')
         openFile.triggered.connect(self.openFileDialog)
         
-        newFile = QAction(QIcon('new_file.jpg'), '&New', self)
+        newFile = QAction(QIcon('new_file.jpg'), '&Create a new bookshelf', self)
         newFile.setShortcut('Ctrl+N')
         newFile.setStatusTip ('Create a new bookshelf')
         newFile.triggered.connect(self.newShelf)
@@ -145,7 +147,7 @@ class ReadingApp(QMainWindow):
     def openFileDialog(self): 
         '''Opens a Goodreads shelf, extracts book id, title, author, page number,
         publication year, ISBN, ISBN13'''
-        fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
+        fname = QFileDialog.getOpenFileName(self, 'Import a goodreads bookshelf', '/home')
 
         if fname[0]:
             with open(fname[0], mode='r', encoding="utf8") as csv_file:
@@ -209,7 +211,7 @@ class ReadingApp(QMainWindow):
                 self.added_book.setText("Please add the author")
         else:
             self.added_book.setText("Please add a title")
-        #print (self.bookShelf)
+        
             
     def newShelf(self):
         '''Clears the bookshelf list, tells the user that shelf is cleared if a bookshelf existed before,
@@ -225,11 +227,19 @@ class ReadingApp(QMainWindow):
     def addProgress(self, index):
         '''Requests new page number in dialog, adds new page number with book id, 
         title and date to new dictionary entry. Prints the update to console and changes label'''
-        text, ok = QInputDialog.getText(self, 'Input Dialog',  #Dialog title, Dialog message
-            'Enter new page:') #Returns text and a boolean value (TRUE or FALSE)
+        bookToUpdate = str(self.combo.currentText())
+        InputText = ""
         
-        if ok:
-            bookToUpdate = str(self.combo.currentText())
+        if len(bookToUpdate)==0:
+            InputText = "You have no book to update"
+        else:
+            InputText = 'What page of ' + bookToUpdate + ' are you on?'
+        
+        text, ok = QInputDialog.getText(self, 'Input Dialog',  #Dialog title, Dialog message
+            InputText) #Returns text and a boolean value (TRUE or FALSE)
+        
+        if ok and len(self.combo.currentText())>0 and len(text)>0:
+            #bookToUpdate = str(self.combo.currentText())
             self.added_book.setText("You are now on page " + str(text) + " of " + 
                                     bookToUpdate) 
             #Sets text of QLabel
@@ -242,7 +252,11 @@ class ReadingApp(QMainWindow):
                             "progress": text}
                     self.updates.append(added_update)
             print (self.updates)
-            
+        elif ok and len(text)==0:
+            self.added_book.setText("Please enter a page number")
+        else:
+            self.added_book.setText("Error: There are no books to update")
+        
     def saveBookShelf(self):
         '''Saves bookshelf to selected folder as a CSV file'''
         save = QFileDialog.getSaveFileName(self, 'Save file', '/home')
