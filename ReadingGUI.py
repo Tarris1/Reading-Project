@@ -199,7 +199,7 @@ class ReadingApp(QMainWindow):
                                         str(author_new) +
                                         " to your reading list")
                 self.combo.addItem(str(title_new))
-                newBookEntry = {"id": id_num, "title": title_new, "author": author_new, "pages": pages_new}
+                newBookEntry = {"id": id_num, "Title": title_new, "Author": author_new, "Number of Pages": pages_new}
                 self.bookShelf.append(newBookEntry)
             else:
                 self.added_book.setText("Please add the author")
@@ -210,6 +210,8 @@ class ReadingApp(QMainWindow):
     def newShelf(self):
         self.bookShelf = []
         self.added_book.setText("Please add books to your new bookshelf.")
+        self.combo.clear()
+        
             
     def addProgress(self, index):
         '''Requests new page number in dialog, adds new page number with book id, 
@@ -236,7 +238,7 @@ class ReadingApp(QMainWindow):
         save = QFileDialog.getSaveFileName(self, 'Save file', '/home')
         
         if save[0]:
-            with open(save[0]+'.csv', mode='w', encoding = "utf8") as csv_file:
+            with open(save[0]+'.csv', mode='w', encoding = "utf8", newline='') as csv_file:
                 fieldnames = ['id', 'Book Id', 'Title', 'Author', 'Number of Pages', 
                               'Original Publication Year', 'ISBN', 'ISBN13']
                 writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
