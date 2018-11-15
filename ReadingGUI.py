@@ -41,21 +41,30 @@ class ReadingApp(QMainWindow):
         
         self.changeShelfBtn = QPushButton('Change Shelf', self)
         
+        self.add_booksLbl = QLabel("Add the details of the new book below:", self)
         self.added_book = QLabel('', self) #Label indicating added book 
         
-        self.add_booksLbl = QLabel("Enter the details of a new book below:")
+        #Change Shelf
         self.changeShelfLbl = QLabel("Change shelf of book")
+        self.changeShelfCombo = QComboBox(self)
+        self.changeShelfTo = QComboBox(self)
+        self.changeShelfTo.addItems(["to-read", "currently-reading", "read"])
+        self.changeShelfBtn = QPushButton('Change Shelf', self)
+        self.changeShelfBtn.clicked.connect(self.changeShelfFunc)
         
-        Stretching = 3
+        changeShelfBox = QVBoxLayout()
+        changeShelfBox.addWidget(self.changeShelfLbl)
+        changeShelfBox.addWidget(self.changeShelfCombo)
+        changeShelfBox.addWidget(self.changeShelfTo)
+        changeShelfBox.addWidget(self.changeShelfBtn)
+        
+        Stretching = 2
         
         TopHBox = QHBoxLayout()
         TopHBox.addWidget(self.add_booksLbl)
         TopHBox.addStretch(Stretching)
         TopHBox.addWidget(self.changeShelfLbl)
         
-        self.changeShelfCombo = QComboBox(self)
-        self.changeShelfTo = QComboBox(self)
-        #self.addNotes = QTextEdit() #
         
         #Entry lines and labels
         self.addTitle = QLineEdit()
@@ -106,6 +115,8 @@ class ReadingApp(QMainWindow):
         ProgresshBox = QHBoxLayout()
         ProgresshBox.addWidget(self.combo)
         ProgresshBox.addWidget(self.btn_progress)
+        ProgresshBox.addStretch(1)
+        ProgresshBox.addLayout(changeShelfBox)
         
         
         addingNewBookVBox = QVBoxLayout() 
@@ -207,6 +218,7 @@ class ReadingApp(QMainWindow):
                         ISBN = f'{row["ISBN"]}'
                         ISBN13 = f'{row["ISBN13"]}'
                         Bookshelves = f'{row["Bookshelves"]}'
+                        self.changeShelfCombo.addItem(str(title))
                         if "currently-reading" in Bookshelves: 
                             #Adds only books on currently reading list to combo box
                             self.combo.addItem(str(title))
@@ -251,6 +263,7 @@ class ReadingApp(QMainWindow):
             newBookEntry = {"id": id_num, "Title": title_new, "Author": author_new, 
                                 "Number of Pages": pages_new, "Bookshelves": bookStatus}
             self.bookShelf.append(newBookEntry)
+            self.changeShelfCombo.addItem(str(title_new))
         elif title_new == "" and author_new != "":
             self.added_book.setText("Please add the author")
         elif title_new != "" and author_new == "":
@@ -315,7 +328,9 @@ class ReadingApp(QMainWindow):
                 writer.writeheader()
                 for i in range(len(self.bookShelf)):
                     writer.writerow(self.bookShelf[i])
-    
+    def changeShelfFunc(self):
+        '''Changes shelf of book selected and adds book to progress combo box if currently-reading is selelected'''
+        print (self.changeShelfTo.currentText())
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
