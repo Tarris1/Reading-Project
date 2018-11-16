@@ -26,6 +26,7 @@ class ReadingApp(QMainWindow):
         
         self.bookShelf = [] #Ensure that a bookShelf exists
         self.updates = []
+        self.currentlyReadingShelf = []
         
         ##################Widgets##################
         self.btn_progress = QPushButton('Update Progress', self) #Add Progress button
@@ -181,6 +182,11 @@ class ReadingApp(QMainWindow):
     def openFileDialog(self): 
         '''Opens a Goodreads shelf, extracts book id, title, author, page number,
         publication year, ISBN, ISBN13'''
+        
+        if self.combo.count()>0:
+            index = self.combo.count()+1
+        else:
+            index = 0
         fname = QFileDialog.getOpenFileName(self, 'Import a goodreads bookshelf', '/home')
 
         if fname[0]:
@@ -205,19 +211,18 @@ class ReadingApp(QMainWindow):
                         ISBN13 = f'{row["ISBN13"]}'
                         Bookshelves = f'{row["Bookshelves"]}'
                         self.changeShelfCombo.addItem(str(title))
-                        if "currently-reading" in Bookshelves: 
-                            #Adds only books on currently reading list to combo box
-                            self.combo.addItem(str(title))
-                        if self.combo.count()>0:
-                            index = self.combo.count()+1
-                        else:
-                            index = line_count-1
+                        index = index + 1
+                        
                         book_dict = {"Book Id" : id_num, "Title" : title, "Author" : author, 
                                      "Number of Pages" : pages, "Bookshelves" : Bookshelves,
                          "Original Publication Year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index}
+                        if "currently-reading" in Bookshelves: 
+                            #Adds only books on currently reading list to combo box
+                            self.combo.addItem(str(title))
+                            self.currentlyReadingShelf.append(book_dict)
                         self.bookShelf.append(book_dict) #Adds to combo bar
                 print(f'Processed {line_count} lines.')
-                
+                print(self.currentlyReadingShelf)
         
                 
     def onActivated(self, text):
@@ -288,29 +293,29 @@ class ReadingApp(QMainWindow):
             self.added_book.setText("You are now on page " + str(text) + " of " + 
                                     bookToUpdate) 
             #Sets text of QLabel
-        
-            #datetime = QDateTime.currentDateTime()
-            for i in range(len(self.bookShelf)):
-                if self.bookShelf[i]["Title"] == bookToUpdate:
-                    id_bookUpdated = (self.bookShelf[i]["id"])
-                    if int(text) >= int(self.bookShelf[i]["Number of Pages"]): 
-                        '''if new page number exceeds pages in the book, 
-                        change shelf to "Read" and remove finished book from combo box '''
+            for i in range(len(self.currentlyReadingShelf)):
+                print(i)
+                if self.currentlyReadingShelf[i]["Title"] == bookToUpdate:
+                    id_bookUpdated = self.currentlyReadingShelf[i]["id"]
+                    if int(text) >= int(self.currentlyReadingShelf[i]["Number of Pages"]):
                         self.combo.removeItem(self.combo.currentIndex())
                         self.added_book.setText("Congratulations! You have now finished "+ 
                                                 bookToUpdate + "!")
-                        self.bookShelf[i].update({"Bookshelves": "Read" })
-                        print(self.bookShelf[i])
-                        text = int(self.bookShelf[i]["Number of Pages"])
-                        
+                        self.bookShelf[id_bookUpdated-1].update({"Bookshelves": "Read"})
+                        #del self.currentlyReadingShelf[i]
+                        print (self.bookShelf[id_bookUpdated-1])
+                        bookToRemove = i
+                        text = int(self.currentlyReadingShelf[i]["Number of Pages"])
                     added_update = {"date": datetime, "id": id_bookUpdated, "Title": bookToUpdate,
                             "progress": text}
                     self.updates.append(added_update)
-            print (self.updates)
+            del self.currentlyReadingShelf[bookToRemove]            
+            self.btn_progress.setText("Update the progress of: " + self.combo.currentText())
         elif ok and len(text)==0:
             self.added_book.setText("Please enter a page number")
         else:
             self.added_book.setText("Error: There are no books to update")
+            
         
     def saveBookShelf(self):
         '''Saves bookshelf to selected folder as a CSV file'''
@@ -319,7 +324,7 @@ class ReadingApp(QMainWindow):
         if save[0]:
             with open(save[0]+'.csv', mode='w', encoding = "utf8", newline='') as csv_file:
                 fieldnames = ['id', 'Book Id', 'Title', 'Author', 'Number of Pages', 
-                              'Original Publication Year', 'ISBN', 'ISBN13']
+                              'Original Publication Year', 'ISBN', 'ISBN13', "Bookshelves"]
                 writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
                 writer.writeheader()
                 for i in range(len(self.bookShelf)):
