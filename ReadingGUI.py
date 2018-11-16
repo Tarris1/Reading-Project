@@ -33,7 +33,6 @@ class ReadingApp(QMainWindow):
         self.btn_progress.setToolTip('Update your reading progress')
         self.btn_progress.clicked.connect(self.addProgress)
         
-        
         self.btn_add_books = QPushButton('Add a New Book', self) ###Add a new Book button
         self.btn_add_books.setToolTip ('Add a new book to your shelf')
         #self.btn_add_books.clicked.connect (self.showDialog) #Opens up a dialog where you can "add" books
@@ -49,27 +48,13 @@ class ReadingApp(QMainWindow):
         self.add_booksLbl = QLabel("Add the details of the new book below:", self)
         self.added_book = QLabel('', self) #Label indicating added book 
         
-        #Change Shelf
+        #Change Shelf widgets
         self.changeShelfLbl = QLabel("Change shelf of book")
         self.changeShelfCombo = QComboBox(self)
         self.changeShelfTo = QComboBox(self)
         self.changeShelfTo.addItems(["to-read", "currently-reading", "read"])
         self.changeShelfBtn = QPushButton('Change Shelf', self)
         self.changeShelfBtn.clicked.connect(self.changeShelfFunc)
-        
-        changeShelfBox = QVBoxLayout()
-        changeShelfBox.addWidget(self.changeShelfLbl)
-        changeShelfBox.addWidget(self.changeShelfCombo)
-        changeShelfBox.addWidget(self.changeShelfTo)
-        changeShelfBox.addWidget(self.changeShelfBtn)
-        
-        statisticsBox = QVBoxLayout()
-        statisticsBox.addWidget(self.statisticsButton)
-        statisticsBox.addWidget(self.statisticsLbl)
-        
-        TopHBox = QHBoxLayout()
-        TopHBox.addWidget(self.add_booksLbl)
-        
         
         #Entry lines and labels
         self.addTitle = QLineEdit()
@@ -93,22 +78,15 @@ class ReadingApp(QMainWindow):
         self.bookStatus = QComboBox(self)
         self.bookStatus.addItems(["To-read", "Currently-Reading", "Read"])
         
+        #Choose book to update progress on
+        self.combo = QComboBox(self) 
+        self.combo.activated[str].connect(self.onActivated) 
         
         addBookHBox = QHBoxLayout()
         addBookHBox.addWidget(self.btn_add_books)
         
         addedBookCommentBox = QHBoxLayout()
         addedBookCommentBox.addWidget(self.added_book)
-        
-        #Choose book to update progress on
-        self.combo = QComboBox(self) 
-        self.combo.activated[str].connect(self.onActivated) 
-        
-        
-        ProgresshBox = QHBoxLayout()
-        ProgresshBox.addWidget(self.combo)
-        ProgresshBox.addWidget(self.btn_progress)
-        #ProgresshBox.addLayout(changeShelfBox)
         
         addNewBookBox = QVBoxLayout()
         addNewBookBox.addWidget(self.add_booksLbl)
@@ -119,6 +97,19 @@ class ReadingApp(QMainWindow):
         addNewBookBox.addLayout(addBookHBox)
         addNewBookBox.addWidget(self.added_book)
         
+        changeShelfBox = QVBoxLayout()
+        changeShelfBox.addWidget(self.changeShelfLbl)
+        changeShelfBox.addWidget(self.changeShelfCombo)
+        changeShelfBox.addWidget(self.changeShelfTo)
+        changeShelfBox.addWidget(self.changeShelfBtn)
+        
+        ProgresshBox = QHBoxLayout()
+        ProgresshBox.addWidget(self.combo)
+        ProgresshBox.addWidget(self.btn_progress)
+        
+        statisticsBox = QVBoxLayout()
+        statisticsBox.addWidget(self.statisticsButton)
+        statisticsBox.addWidget(self.statisticsLbl)
         
         mainColumn = QVBoxLayout() 
         mainColumn.addLayout(addNewBookBox)
@@ -130,10 +121,25 @@ class ReadingApp(QMainWindow):
         mainColumn.addLayout(statisticsBox)
         #addingNewBookVBox.setMargin(0)
         
-               
-        tab1 = QWidget(self) #First Tab
-        self.setCentralWidget(tab1)
-        tab1.setLayout(mainColumn)
+        self.layout = QVBoxLayout(self)
+        
+        tab1 = QWidget()
+        tab2 = QWidget()
+        tabs = QTabWidget()
+        
+        tabs.addTab(tab1, "Tab 1")
+        tabs.addTab(tab2, "Tab 2")
+        
+        tab1.layout = mainColumn
+        tab1.setLayout(tab1.layout)
+        
+        self.layout.addWidget(tabs)
+        self.setLayout(self.layout)
+        self.setCentralWidget(tabs)
+        
+        #tab1 = QWidget(self) #First Tab
+        #self.setCentralWidget(tab1)
+        #tab1.setLayout(mainColumn)
         ####################
         
         ###MenuBar#######
@@ -166,6 +172,7 @@ class ReadingApp(QMainWindow):
         fileMenu.addAction(saveFile)
         fileMenu.addAction(exitAct)
         ###########################
+        
         
         #Show widgets
         self.setWindowIcon(QIcon('readinglogo.jpg'))
