@@ -100,7 +100,6 @@ class ReadingApp(QMainWindow):
         ProgresshBox = QHBoxLayout()
         ProgresshBox.addWidget(self.combo)
         ProgresshBox.addWidget(self.btn_progress)
-        ProgresshBox.addStretch(1)
         #ProgresshBox.addLayout(changeShelfBox)
         
         
@@ -294,6 +293,16 @@ class ReadingApp(QMainWindow):
             for i in range(len(self.bookShelf)):
                 if self.bookShelf[i]["Title"] == bookToUpdate:
                     id_bookUpdated = (self.bookShelf[i]["id"])
+                    if int(text) >= int(self.bookShelf[i]["Number of Pages"]): 
+                        '''if new page number exceeds pages in the book, 
+                        change shelf to "Read" and remove finished book from combo box '''
+                        self.combo.removeItem(self.combo.currentIndex())
+                        self.added_book.setText("Congratulations! You have now finished "+ 
+                                                bookToUpdate + "!")
+                        self.bookShelf[i].update({"Bookshelves": "Read" })
+                        print(self.bookShelf[i])
+                        text = int(self.bookShelf[i]["Number of Pages"])
+                        
                     added_update = {"date": datetime, "id": id_bookUpdated, "Title": bookToUpdate,
                             "progress": text}
                     self.updates.append(added_update)
