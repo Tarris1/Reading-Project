@@ -58,12 +58,9 @@ class ReadingApp(QMainWindow):
         changeShelfBox.addWidget(self.changeShelfTo)
         changeShelfBox.addWidget(self.changeShelfBtn)
         
-        Stretching = 2
         
         TopHBox = QHBoxLayout()
         TopHBox.addWidget(self.add_booksLbl)
-        TopHBox.addStretch(Stretching)
-        TopHBox.addWidget(self.changeShelfLbl)
         
         
         #Entry lines and labels
@@ -72,41 +69,29 @@ class ReadingApp(QMainWindow):
         titleHbox = QHBoxLayout()
         titleHbox.addWidget(self.addTitle)
         titleHbox.addWidget(self.addTitleLbl)
-        titleHbox.addStretch(Stretching)
-        titleHbox.addWidget(self.changeShelfCombo)
-        titleHbox.addWidget(self.changeShelfTo)
-        
-        
+               
         self.addAuthor = QLineEdit()
         self.addAuthorLbl = QLabel("Author", self)
         AuthorHbox = QHBoxLayout()
         AuthorHbox.addWidget(self.addAuthor)
         AuthorHbox.addWidget(self.addAuthorLbl)
-        AuthorHbox.addStretch(Stretching)
-        AuthorHbox.addWidget(self.changeShelfBtn)
-        
         
         self.addPages = QLineEdit()
         self.addPagesLbl = QLabel("Pages", self)
         PagesHbox = QHBoxLayout()
         PagesHbox.addWidget(self.addPages)
         PagesHbox.addWidget(self.addPagesLbl)
-        PagesHbox.addStretch(Stretching)
-        
         
         self.bookStatus = QComboBox(self)
         self.bookStatus.addItems(["To-read", "Currently-Reading", "Read"])
         bookStatusBox = QHBoxLayout()
-        bookStatusBox.addWidget(self.bookStatus)
-        bookStatusBox.addStretch(Stretching)
         
         addBookHBox = QHBoxLayout()
         addBookHBox.addWidget(self.btn_add_books)
-        addBookHBox.addStretch(Stretching)
         
         addedBookCommentBox = QHBoxLayout()
         addedBookCommentBox.addWidget(self.added_book)
-        addedBookCommentBox.addStretch(Stretching)
+        
         #Choose book to update progress on
         self.combo = QComboBox(self) 
         self.combo.activated[str].connect(self.onActivated) 
@@ -116,7 +101,7 @@ class ReadingApp(QMainWindow):
         ProgresshBox.addWidget(self.combo)
         ProgresshBox.addWidget(self.btn_progress)
         ProgresshBox.addStretch(1)
-        ProgresshBox.addLayout(changeShelfBox)
+        #ProgresshBox.addLayout(changeShelfBox)
         
         
         addingNewBookVBox = QVBoxLayout() 
@@ -127,7 +112,9 @@ class ReadingApp(QMainWindow):
         addingNewBookVBox.addLayout(bookStatusBox) #Combo box for shelf
         addingNewBookVBox.addLayout(addBookHBox)
         addingNewBookVBox.addWidget(self.added_book) 
-        addingNewBookVBox.addStretch(2)
+        addingNewBookVBox.addStretch(1)
+        addingNewBookVBox.addLayout(changeShelfBox)
+        addingNewBookVBox.addStretch(1)
         addingNewBookVBox.addLayout(ProgresshBox)
         #addingNewBookVBox.setMargin(0)
         
