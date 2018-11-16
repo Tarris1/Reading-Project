@@ -67,8 +67,6 @@ class ReadingApp(QMainWindow):
         statisticsBox.addWidget(self.statisticsButton)
         statisticsBox.addWidget(self.statisticsLbl)
         
-        
-        
         TopHBox = QHBoxLayout()
         TopHBox.addWidget(self.add_booksLbl)
         
@@ -112,27 +110,30 @@ class ReadingApp(QMainWindow):
         ProgresshBox.addWidget(self.btn_progress)
         #ProgresshBox.addLayout(changeShelfBox)
         
+        addNewBookBox = QVBoxLayout()
+        addNewBookBox.addWidget(self.add_booksLbl)
+        addNewBookBox.addLayout(titleHbox)
+        addNewBookBox.addLayout(AuthorHbox)
+        addNewBookBox.addLayout(PagesHbox)
+        addNewBookBox.addWidget(self.bookStatus)
+        addNewBookBox.addLayout(addBookHBox)
+        addNewBookBox.addWidget(self.added_book)
         
-        addingNewBookVBox = QVBoxLayout() 
-        addingNewBookVBox.addLayout(TopHBox)
-        addingNewBookVBox.addLayout(titleHbox)
-        addingNewBookVBox.addLayout(AuthorHbox)
-        addingNewBookVBox.addLayout(PagesHbox)
-        addingNewBookVBox.addWidget(self.bookStatus) #Combo box for shelf
-        addingNewBookVBox.addLayout(addBookHBox)
-        addingNewBookVBox.addWidget(self.added_book) 
-        addingNewBookVBox.addStretch(1)
-        addingNewBookVBox.addLayout(changeShelfBox)
-        addingNewBookVBox.addStretch(1)
-        addingNewBookVBox.addLayout(ProgresshBox)
-        addingNewBookVBox.addStretch(1)
-        addingNewBookVBox.addLayout(statisticsBox)
+        
+        mainColumn = QVBoxLayout() 
+        mainColumn.addLayout(addNewBookBox)
+        mainColumn.addStretch(1)
+        mainColumn.addLayout(changeShelfBox)
+        mainColumn.addStretch(1)
+        mainColumn.addLayout(ProgresshBox)
+        mainColumn.addStretch(1)
+        mainColumn.addLayout(statisticsBox)
         #addingNewBookVBox.setMargin(0)
         
                
         tab1 = QWidget(self) #First Tab
         self.setCentralWidget(tab1)
-        tab1.setLayout(addingNewBookVBox)
+        tab1.setLayout(mainColumn)
         ####################
         
         ###MenuBar#######
@@ -291,6 +292,7 @@ class ReadingApp(QMainWindow):
         bookToUpdate = str(self.combo.currentText())
         InputText = ""
         datetime = QDateTime.currentDateTime()
+        updateOrNot = False
         #datetime = datetime.toString()
         
         if len(bookToUpdate)==0:
@@ -318,11 +320,14 @@ class ReadingApp(QMainWindow):
                         #del self.currentlyReadingShelf[i]
                         print (self.bookShelf[id_bookUpdated-1])
                         bookToRemove = i
+                        updateOrNot = True
                         text = int(self.currentlyReadingShelf[i]["Number of Pages"])
+                        
                     added_update = {"date": datetime, "id": id_bookUpdated, "Title": bookToUpdate,
                             "progress": text}
                     self.updates.append(added_update)
-            del self.currentlyReadingShelf[bookToRemove]            
+            if updateOrNot == True:
+                del self.currentlyReadingShelf[bookToRemove]                      
             self.btn_progress.setText("Update the progress of: " + self.combo.currentText())
         elif ok and len(text)==0:
             self.added_book.setText("Please enter a page number")
@@ -353,7 +358,7 @@ class ReadingApp(QMainWindow):
         ###Extract books read:
         for i in range(len(booksToAnalyze)):
             bookShelves = booksToAnalyze[i]["Bookshelves"]
-            if not ("currently-reading") in bookShelves and not ("to-read") in bookShelves:
+            if not ("currently-reading") in bookShelves and not ("to-read") in bookShelves or "Read" in bookShelves:
                 pageOfBookI = booksToAnalyze[i]["Number of Pages"]
                 if len(pageOfBookI)>0:
                     page_read = page_read+int(booksToAnalyze[i]["Number of Pages"])
