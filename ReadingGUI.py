@@ -27,6 +27,7 @@ class ReadingApp(QMainWindow):
         self.bookShelf = [] #Initiate bookshelf list
         self.updates = [] #Initiate update list
         self.currentlyReadingShelf = [] #Initiate currently reading shelf
+        self.booksReadShelf = [] #Initiate read books shelf
         
         ##################Widgets##################
         self.btn_progress = QPushButton('Update Progress', self) #Add Progress button
@@ -256,6 +257,7 @@ class ReadingApp(QMainWindow):
                         ISBN = f'{row["ISBN"]}'
                         ISBN13 = f'{row["ISBN13"]}'
                         Bookshelves = f'{row["Bookshelves"]}'
+                        dateRead = f'{row["Date Read"]}'
                         self.changeShelfCombo.addItem(str(title))
                         index = index + 1
                         
@@ -263,14 +265,18 @@ class ReadingApp(QMainWindow):
                         
                         book_dict = {"Book Id" : id_num, "Title" : title, "Author" : author, 
                                      "Number of Pages" : pages, "Bookshelves" : Bookshelves,
-                         "Original Publication Year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index}
+                         "Original Publication Year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index,
+                         "Date Read": dateRead}
                         if "currently-reading" in Bookshelves: 
                             #Adds only books on currently reading list to combo box
                             self.combo.addItem(str(title))
                             self.currentlyReadingShelf.append(book_dict)
                         self.bookShelf.append(book_dict) #Adds to combo bar
+                        if dateRead != "":
+                            self.booksReadShelf.append(book_dict)
                 print(f'Processed {line_count} lines.')
-                print(self.currentlyReadingShelf)
+                print (len(self.booksReadShelf))
+
                 
         
                 
@@ -354,6 +360,7 @@ class ReadingApp(QMainWindow):
                         self.updatedBookLbl.setText("Congratulations! You have now finished "+ 
                                                 bookToUpdate + "!")
                         self.bookShelf[id_bookUpdated-1].update({"Bookshelves": "Read"})
+                        self.bookShelf[id_bookUpdated-1].update({"Date Red": datetime})
                         #del self.currentlyReadingShelf[i]
                         print (self.bookShelf[id_bookUpdated-1])
                         bookToRemove = i
@@ -401,7 +408,7 @@ class ReadingApp(QMainWindow):
         inputText = ("Did you finish " + bookToUpdate + "? If so, feel free to add a review below")
         
         text, ok = QInputDialog.getMultiLineText(self, 'input Dialog', inputText)
-        if ok and len(self.combo.currentText())>0 and len(text)>0:
+        if ok and len(self.combo.currentText())>0 and len(text)>=0:
             self.updatedBookLbl.setText("You are now on page " + str(text) + " of " + 
                                     bookToUpdate) 
             #Sets text of QLabel
@@ -413,6 +420,7 @@ class ReadingApp(QMainWindow):
                     self.updatedBookLbl.setText("Congratulations! You have now finished "+ 
                                                 bookToUpdate + "!")
                     self.bookShelf[id_bookUpdated-1].update({"Bookshelves": "Read"})
+                    self.bookShelf[id_bookUpdated-1].update({"Date Read": datetime})
                         #del self.currentlyReadingShelf[i]
                     print (self.bookShelf[id_bookUpdated-1])
                     bookToRemove = i
@@ -424,6 +432,7 @@ class ReadingApp(QMainWindow):
                             "progress": pages_read, "review": text}
                     self.updates.append(added_update)
                     print (self.updates)
+                    print
             if updateOrNot == True:
                 del self.currentlyReadingShelf[bookToRemove]                      
             self.btn_progress.setText("Update the progress of: " + self.combo.currentText())
