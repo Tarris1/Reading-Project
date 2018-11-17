@@ -39,6 +39,9 @@ class ReadingApp(QMainWindow):
         self.btn_add_books.setShortcut('Ctrl+E')
         self.btn_add_books.clicked.connect(self.addBooksFunc)
         
+        self.btnFinishedBook = QPushButton("Finished the book? Click here.", self)
+        self.updatedBookLbl = QLabel("", self)
+        
         self.statisticsButton = QPushButton('Click here for Statistics', self)
         self.statisticsButton.clicked.connect(self.bookStatistics)
         self.statisticsLbl = QLabel("", self)
@@ -97,52 +100,63 @@ class ReadingApp(QMainWindow):
         addNewBookBox.addLayout(addBookHBox)
         addNewBookBox.addWidget(self.added_book)
         
-        changeShelfBox = QVBoxLayout()
-        changeShelfBox.addWidget(self.changeShelfLbl)
-        changeShelfBox.addWidget(self.changeShelfCombo)
-        changeShelfBox.addWidget(self.changeShelfTo)
-        changeShelfBox.addWidget(self.changeShelfBtn)
+        self.changeShelfBox = QVBoxLayout()
+        self.changeShelfBox.addWidget(self.changeShelfLbl)
+        self.changeShelfBox.addWidget(self.changeShelfCombo)
+        self.changeShelfBox.addWidget(self.changeShelfTo)
+        self.changeShelfBox.addWidget(self.changeShelfBtn)
         
         ProgresshBox = QHBoxLayout()
-        ProgresshBox.addWidget(self.combo)
+        #ProgresshBox.addWidget(self.combo)
         ProgresshBox.addWidget(self.btn_progress)
+        ProgresshBox.addWidget(self.btnFinishedBook)
         
         
         mainColumn = QVBoxLayout() 
         mainColumn.addLayout(addNewBookBox)
         mainColumn.addStretch(1)
-        mainColumn.addLayout(changeShelfBox)
-        mainColumn.addStretch(1)
+        mainColumn.addWidget(self.combo)
         mainColumn.addLayout(ProgresshBox)
+        mainColumn.addWidget(self.updatedBookLbl)
         mainColumn.addStretch(1)
-        #mainColumn.addLayout(statisticsBox)
-        #addingNewBookVBox.setMargin(0)
+    
         
         statisticsBox = QVBoxLayout()
         statisticsBox.addWidget(self.statisticsButton)
         statisticsBox.addWidget(self.statisticsLbl)
+        statisticsBox.addStretch(1)
+        
+        shelfBox = QVBoxLayout()
+        shelfBox.addLayout(self.changeShelfBox)
+        shelfBox.addStretch(1)
         
         self.layout = QVBoxLayout(self)
         
         self.addBookTab = QWidget()
-        self.tab2 = QWidget()
+        self.yourBookShelf = QWidget()
         self.statisticsTab = QWidget()
         self.tabs = QTabWidget()
+        self.tabs.setMovable(True)
         
+        
+        #set layout of tab 1
         self.addBookTab.layout = QVBoxLayout()
         self.addBookTab.layout.addLayout(mainColumn)      
         self.addBookTab.setLayout(self.addBookTab.layout)
         
-        self.tab2.layout = QVBoxLayout()
-        #self.tab2.layout.addLayout(statisticsTab)
-        self.tab2.setLayout(self.tab2.layout)
+        #set layout of tab 2
+        self.yourBookShelf.layout = QVBoxLayout()
+        self.yourBookShelf.layout.addLayout(shelfBox)
+        self.yourBookShelf.setLayout(self.yourBookShelf.layout)
         
+        #set layout of tab 3
         self.statisticsTab.layout = QVBoxLayout()
         self.statisticsTab.layout.addLayout(statisticsBox)
         self.statisticsTab.setLayout(self.statisticsTab.layout)
         
+        #Add tabs to window
         self.tabs.addTab(self.addBookTab, "Add Books")
-        self.tabs.addTab(self.tab2, "Your bookshelf")
+        self.tabs.addTab(self.yourBookShelf, "Your bookshelf")
         self.tabs.addTab(self.statisticsTab, "Reading Statistics")
         
 
@@ -245,6 +259,8 @@ class ReadingApp(QMainWindow):
                         self.changeShelfCombo.addItem(str(title))
                         index = index + 1
                         
+                        
+                        
                         book_dict = {"Book Id" : id_num, "Title" : title, "Author" : author, 
                                      "Number of Pages" : pages, "Bookshelves" : Bookshelves,
                          "Original Publication Year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index}
@@ -325,7 +341,7 @@ class ReadingApp(QMainWindow):
         
         if ok and len(self.combo.currentText())>0 and len(text)>0:
             #bookToUpdate = str(self.combo.currentText())
-            self.added_book.setText("You are now on page " + str(text) + " of " + 
+            self.updatedBookLbl.setText("You are now on page " + str(text) + " of " + 
                                     bookToUpdate) 
             #Sets text of QLabel
             for i in range(len(self.currentlyReadingShelf)):
@@ -334,7 +350,7 @@ class ReadingApp(QMainWindow):
                     id_bookUpdated = self.currentlyReadingShelf[i]["id"]
                     if int(text) >= int(self.currentlyReadingShelf[i]["Number of Pages"]):
                         self.combo.removeItem(self.combo.currentIndex())
-                        self.added_book.setText("Congratulations! You have now finished "+ 
+                        self.updatedBookLbl.setText("Congratulations! You have now finished "+ 
                                                 bookToUpdate + "!")
                         self.bookShelf[id_bookUpdated-1].update({"Bookshelves": "Read"})
                         #del self.currentlyReadingShelf[i]
@@ -350,9 +366,9 @@ class ReadingApp(QMainWindow):
                 del self.currentlyReadingShelf[bookToRemove]                      
             self.btn_progress.setText("Update the progress of: " + self.combo.currentText())
         elif ok and len(text)==0:
-            self.added_book.setText("Please enter a page number")
+            self.updatedBookLbl.setText("Please enter a page number")
         else:
-            self.added_book.setText("Error: There are no books to update")
+            self.updatedBookLbl.setText("Error: There are no books to update")
             
         
     def saveBookShelf(self):
@@ -383,7 +399,8 @@ class ReadingApp(QMainWindow):
                 if len(pageOfBookI)>0:
                     page_read = page_read+int(booksToAnalyze[i]["Number of Pages"])
         self.statisticsLbl.setText("You have a read a total of " + str(page_read) + " pages since you started reading.")
-        
+      
+   
         
     
 
