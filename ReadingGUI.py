@@ -8,12 +8,12 @@ Created on Tue Oct 30 19:27:49 2018
 import sys
 import csv
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget,
-                             QAction, QTableWidget,QTableWidgetItem,QVBoxLayout, QHBoxLayout,
+                             QAction,QVBoxLayout, QHBoxLayout,
                              QLabel, QLineEdit, QPushButton, QTabWidget,
-                             qApp, QInputDialog, QFileDialog, QTextEdit, QComboBox, QShortcut,QGridLayout)
+                             qApp, QInputDialog, QFileDialog, QComboBox)
                              
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot, QDateTime
+from PyQt5.QtCore import QDateTime
 
 class ReadingApp(QMainWindow):
     def __init__(self):
@@ -40,6 +40,7 @@ class ReadingApp(QMainWindow):
         self.btn_add_books.clicked.connect(self.addBooksFunc)
         
         self.btnFinishedBook = QPushButton("Finished the book? Click here.", self)
+        self.btnFinishedBook.clicked.connect(self.finishedBook)
         self.updatedBookLbl = QLabel("", self)
         
         self.statisticsButton = QPushButton('Click here for Statistics', self)
@@ -118,9 +119,8 @@ class ReadingApp(QMainWindow):
         mainColumn.addWidget(self.combo)
         mainColumn.addLayout(ProgresshBox)
         mainColumn.addWidget(self.updatedBookLbl)
-        mainColumn.addStretch(1)
+        #mainColumn.addStretch(1)
     
-        
         statisticsBox = QVBoxLayout()
         statisticsBox.addWidget(self.statisticsButton)
         statisticsBox.addWidget(self.statisticsLbl)
@@ -271,6 +271,7 @@ class ReadingApp(QMainWindow):
                         self.bookShelf.append(book_dict) #Adds to combo bar
                 print(f'Processed {line_count} lines.')
                 print(self.currentlyReadingShelf)
+                
         
                 
     def onActivated(self, text):
@@ -384,9 +385,51 @@ class ReadingApp(QMainWindow):
                 for i in range(len(self.bookShelf)):
                     writer.writerow(self.bookShelf[i])
     def changeShelfFunc(self):
-        '''Changes shelf of book selected and adds book to progress combo box if currently-reading is selelected'''
+        '''Changes shelf of book selected and adds book to progress combo box 
+        if currently-reading is selelected'''
         print (self.changeShelfTo.currentText())
     
+    
+      
+    def finishedBook(self):
+        '''Opens a review dialog, removes finished book from combo widget, 
+        changes bookshelf to "read" and adds progress to progress list'''
+        bookToUpdate = str(self.combo.currentText())
+        datetime = QDateTime.currentDateTime()
+        updateOrNot = False
+        
+        inputText = ("Did you finish " + bookToUpdate + "? If so, feel free to add a review below")
+        
+        text, ok = QInputDialog.getMultiLineText(self, 'input Dialog', inputText)
+        if ok and len(self.combo.currentText())>0 and len(text)>0:
+            self.updatedBookLbl.setText("You are now on page " + str(text) + " of " + 
+                                    bookToUpdate) 
+            #Sets text of QLabel
+            for i in range(len(self.currentlyReadingShelf)):
+                print(i)
+                if self.currentlyReadingShelf[i]["Title"] == bookToUpdate:
+                    id_bookUpdated = self.currentlyReadingShelf[i]["id"]
+                    self.combo.removeItem(self.combo.currentIndex())
+                    self.updatedBookLbl.setText("Congratulations! You have now finished "+ 
+                                                bookToUpdate + "!")
+                    self.bookShelf[id_bookUpdated-1].update({"Bookshelves": "Read"})
+                        #del self.currentlyReadingShelf[i]
+                    print (self.bookShelf[id_bookUpdated-1])
+                    bookToRemove = i
+                    updateOrNot = True
+                    pages_read = int(self.currentlyReadingShelf[i]["Number of Pages"])
+                    
+                        
+                    added_update = {"date": datetime, "id": id_bookUpdated, "Title": bookToUpdate,
+                            "progress": pages_read, "review": text}
+                    self.updates.append(added_update)
+                    print (self.updates)
+            if updateOrNot == True:
+                del self.currentlyReadingShelf[bookToRemove]                      
+            self.btn_progress.setText("Update the progress of: " + self.combo.currentText())
+        else:
+            self.updatedBookLbl.setText("")    
+        
     def bookStatistics(self):
         '''Prints out statistics'''
         booksToAnalyze = self.bookShelf
@@ -398,10 +441,8 @@ class ReadingApp(QMainWindow):
                 pageOfBookI = booksToAnalyze[i]["Number of Pages"]
                 if len(pageOfBookI)>0:
                     page_read = page_read+int(booksToAnalyze[i]["Number of Pages"])
-        self.statisticsLbl.setText("You have a read a total of " + str(page_read) + " pages since you started reading.")
-      
-   
-        
+        self.statisticsLbl.setText("You have a read a total of " + str(page_read) + 
+                                   " pages since you started reading.")
     
 
 if __name__ == '__main__':
