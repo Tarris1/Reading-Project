@@ -107,9 +107,6 @@ class ReadingApp(QMainWindow):
         ProgresshBox.addWidget(self.combo)
         ProgresshBox.addWidget(self.btn_progress)
         
-        statisticsBox = QVBoxLayout()
-        statisticsBox.addWidget(self.statisticsButton)
-        statisticsBox.addWidget(self.statisticsLbl)
         
         mainColumn = QVBoxLayout() 
         mainColumn.addLayout(addNewBookBox)
@@ -118,24 +115,40 @@ class ReadingApp(QMainWindow):
         mainColumn.addStretch(1)
         mainColumn.addLayout(ProgresshBox)
         mainColumn.addStretch(1)
-        mainColumn.addLayout(statisticsBox)
+        #mainColumn.addLayout(statisticsBox)
         #addingNewBookVBox.setMargin(0)
+        
+        statisticsBox = QVBoxLayout()
+        statisticsBox.addWidget(self.statisticsButton)
+        statisticsBox.addWidget(self.statisticsLbl)
         
         self.layout = QVBoxLayout(self)
         
-        tab1 = QWidget()
-        tab2 = QWidget()
-        tabs = QTabWidget()
+        self.addBookTab = QWidget()
+        self.tab2 = QWidget()
+        self.statisticsTab = QWidget()
+        self.tabs = QTabWidget()
         
-        tabs.addTab(tab1, "Tab 1")
-        tabs.addTab(tab2, "Tab 2")
+        self.addBookTab.layout = QVBoxLayout()
+        self.addBookTab.layout.addLayout(mainColumn)      
+        self.addBookTab.setLayout(self.addBookTab.layout)
         
-        tab1.layout = mainColumn
-        tab1.setLayout(tab1.layout)
+        self.tab2.layout = QVBoxLayout()
+        #self.tab2.layout.addLayout(statisticsTab)
+        self.tab2.setLayout(self.tab2.layout)
         
-        self.layout.addWidget(tabs)
+        self.statisticsTab.layout = QVBoxLayout()
+        self.statisticsTab.layout.addLayout(statisticsBox)
+        self.statisticsTab.setLayout(self.statisticsTab.layout)
+        
+        self.tabs.addTab(self.addBookTab, "Add Books")
+        self.tabs.addTab(self.tab2, "Your bookshelf")
+        self.tabs.addTab(self.statisticsTab, "Reading Statistics")
+        
+
+        self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
-        self.setCentralWidget(tabs)
+        self.setCentralWidget(self.tabs)
         
         #tab1 = QWidget(self) #First Tab
         #self.setCentralWidget(tab1)
