@@ -258,6 +258,7 @@ class ReadingApp(QMainWindow):
                         ISBN13 = f'{row["ISBN13"]}'
                         Bookshelves = f'{row["Bookshelves"]}'
                         dateRead = f'{row["Date Read"]}'
+                        myReview = f'{row["My Review"]}'
                         self.changeShelfCombo.addItem(str(title))
                         index = index + 1
                         
@@ -266,7 +267,7 @@ class ReadingApp(QMainWindow):
                         book_dict = {"Book Id" : id_num, "Title" : title, "Author" : author, 
                                      "Number of Pages" : pages, "Bookshelves" : Bookshelves,
                          "Original Publication Year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index,
-                         "Date Read": dateRead}
+                         "Date Read": dateRead, "My Review": myReview}
                         if "currently-reading" in Bookshelves: 
                             #Adds only books on currently reading list to combo box
                             self.combo.addItem(str(title))
@@ -360,7 +361,7 @@ class ReadingApp(QMainWindow):
                         self.updatedBookLbl.setText("Congratulations! You have now finished "+ 
                                                 bookToUpdate + "!")
                         self.bookShelf[id_bookUpdated-1].update({"Bookshelves": "Read"})
-                        self.bookShelf[id_bookUpdated-1].update({"Date Red": datetime})
+                        self.bookShelf[id_bookUpdated-1].update({"Date Read": datetime})
                         #del self.currentlyReadingShelf[i]
                         print (self.bookShelf[id_bookUpdated-1])
                         bookToRemove = i
@@ -386,7 +387,8 @@ class ReadingApp(QMainWindow):
         if save[0]:
             with open(save[0]+'.csv', mode='w', encoding = "utf8", newline='') as csv_file:
                 fieldnames = ['id', 'Book Id', 'Title', 'Author', 'Number of Pages', 
-                              'Original Publication Year', 'ISBN', 'ISBN13', "Bookshelves"]
+                              'Original Publication Year', 'ISBN', 'ISBN13',
+                              "Bookshelves", "Date Read", "My Review"]
                 writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
                 writer.writeheader()
                 for i in range(len(self.bookShelf)):
@@ -421,6 +423,7 @@ class ReadingApp(QMainWindow):
                                                 bookToUpdate + "!")
                     self.bookShelf[id_bookUpdated-1].update({"Bookshelves": "Read"})
                     self.bookShelf[id_bookUpdated-1].update({"Date Read": datetime})
+                    self.bookShelf[id_bookUpdated-1].update({"My Review": text})
                         #del self.currentlyReadingShelf[i]
                     print (self.bookShelf[id_bookUpdated-1])
                     bookToRemove = i
