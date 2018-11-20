@@ -66,6 +66,7 @@ class ReadingApp(QMainWindow):
         self.changeShelfBtn.clicked.connect(self.changeShelfFunc)
         
         #Filter functionality
+        self.filterOptions = [">=", "=", ">", "<", "<=", ""]
         self.filterBox = QHBoxLayout()
         
         self.filterEditBoxOne = QVBoxLayout()
@@ -77,12 +78,16 @@ class ReadingApp(QMainWindow):
         self.filterEditPagesOne = QLineEdit(self)
         self.filterEditPagesTwo = QLineEdit(self)
         self.filterEditPagesOneCombo = QComboBox(self)
+        self.filterEditPagesOneCombo.addItems(self.filterOptions)
         self.filterEditPagesTwoCombo = QComboBox(self)
+        self.filterEditPagesTwoCombo.addItems(self.filterOptions)
         self.filterEditPagesLbl = QLabel("Select range of pages")
         self.filterEditYearOne = QLineEdit(self)
         self.filterEditYearTwo = QLineEdit(self)
         self.filterEditYearOneCombo = QComboBox(self)
+        self.filterEditYearOneCombo.addItems(self.filterOptions)
         self.filterEditYearTwoCombo = QComboBox(self)
+        self.filterEditYearTwoCombo.addItems(self.filterOptions)
         self.filterEditYearLbl = QLabel("Select range of publication years")
         
         self.filterEditBoxOne.addWidget(self.filterEditPagesOne)
@@ -96,7 +101,8 @@ class ReadingApp(QMainWindow):
         self.filterEditBoxComboTwo.addWidget(self.filterEditYearTwoCombo)
         
         self.filterBtn = QPushButton("Click here to filter")
-        
+        self.filterBtn.clicked.connect(self.filterTableFunc)
+        ###################################
         
         self.filterLabelBox = QVBoxLayout()
         self.filterLabelBox.addWidget(self.filterEditPagesLbl)
@@ -179,9 +185,10 @@ class ReadingApp(QMainWindow):
         ##2nd Tab
         self.shelfBox = QVBoxLayout()
         self.shelfBox.addLayout(self.changeShelfBox)
+        self.shelfBox.addStretch(1)
         self.shelfBox.addLayout(self.filterBox)
         self.shelfBox.addWidget(self.filterBtn)
-        self.shelfBox.addStretch(1)
+        #self.shelfBox.addStretch(1)
         
         
         
@@ -368,8 +375,8 @@ class ReadingApp(QMainWindow):
         tv = QTableView()
 
         # set the table model
-        header = ['id', 'Title', 'Author', 'Number of Pages', 'Bookshelves', 'Original Publication Year']
-        tablemodel = MyTableModel(self.tabledata, header, self)
+        self.header = ['id', 'Title', 'Author', 'Number of Pages', 'Bookshelves', 'Original Publication Year']
+        tablemodel = MyTableModel(self.tabledata, self.header, self)
         tv.setModel(tablemodel)
 
         # set the minimum size
@@ -428,7 +435,7 @@ class ReadingApp(QMainWindow):
             elif pages_new == "":
                 pages_new = 1
             row_data = [id_num, title_new, author_new, int(pages_new), bookStatus, ""] #Also makes a list of lists version
-            self.tabledata.append(row_data) #appends to tabledata
+            data.append(row_data) #appends to tabledata
             
             if "currently-reading" in bookStatus.lower(): 
                 #Only books currently to read is added to combo widget
@@ -458,7 +465,8 @@ class ReadingApp(QMainWindow):
         else:
             self.added_book.setText("A bookshelf has been created. Please add books to your new bookshelf.")
         self.combo.clear()
-        self.table.model().layoutChanged.emit()
+        
+        #self.table.model().layoutChanged.emit()
         
             
     def addProgress(self, index):
@@ -586,6 +594,50 @@ class ReadingApp(QMainWindow):
                     page_read = page_read+int(booksToAnalyze[i]["Number of Pages"])
         self.statisticsLbl.setText("You have a read a total of " + str(page_read) + 
                                    " pages since you started reading.")
+        
+    def filterTableFunc(self):
+        '''filters the data table and updates table'''
+        self.filteredData = []
+        self.originalModel = self.tabledata
+        filtPagesOne = self.filterEditPagesOneCombo.currentText()
+        filtPagesTwo = self.filterEditPagesTwoCombo.currentText()
+        filtYearOne = self.filterEditYearOneCombo.currentText()
+        filtYearTwo = self.filterEditYearTwoCombo.currentText()
+        pagesOne = int(self.filterEditPagesOne.displayText())
+        pagesTwo = self.filterEditPagesTwo.displayText()
+        yearOne = self.filterEditYearOne.displayText()
+        yearTwo = self.filterEditYearTwo.displayText()
+        filters = [filtPagesOne, filtPagesTwo, filtYearOne, filtYearTwo]
+        ranges = [pagesOne, pagesTwo, yearOne, yearTwo]
+        print (ranges)
+            
+        #3rd position is pages, 5th position is publication year
+        #Filter works fine, but table doesnt update - probably data is unchanged
+        #self.table.model().layoutAboutToBeChanged.emit()
+        for i in range(len(self.tabledata)):
+            if filtPagesOne == ">=":
+                if int(self.tabledata[i][3]) >= pagesOne:
+                    self.filteredData.append(self.tabledata[i])
+                    
+            if filtPagesOne == "=":
+                if self.tabledata[i][3] == pagesOne:
+                    self.filteredData.append(self.tabledata[i])
+            
+            if filtPagesOne == ">":
+                if self.tabledata[i][3] > pagesOne:
+                    self.filteredData.append(self.tabledata[i])
+                    
+            if filtPagesOne == "<=":
+                if self.tabledata[i][3] <= pagesOne:
+                    self.filteredData.append(self.tabledata[i])
+            
+            if filtPagesOne == "<":
+                if self.tabledata[i][3] < pagesOne:
+                    self.filteredData.append(self.tabledata[i])
+        
+        newModel = MyTableModel(self.filteredData, self.header, self)
+        self.table.setModel(newModel)
+        self.table.model().layoutChanged.emit()
         
 
 from PyQt5.QtCore import *
