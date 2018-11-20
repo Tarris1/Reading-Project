@@ -7,6 +7,7 @@ Created on Tue Oct 30 19:27:49 2018
 
 import sys
 import csv
+import operator
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget,
                              QAction,QVBoxLayout, QHBoxLayout,
                              QLabel, QLineEdit, QPushButton, QTabWidget,
@@ -30,6 +31,7 @@ class ReadingApp(QMainWindow):
         self.updates = [] #Initiate update list
         self.currentlyReadingShelf = [] #Initiate currently reading shelf
         self.booksReadShelf = [] #Initiate read books shelf
+        self.tabledata = [] #Initiate table data list
         
         ##################Widgets##################
         self.btn_progress = QPushButton('Update Progress', self) #Add Progress button
@@ -84,7 +86,7 @@ class ReadingApp(QMainWindow):
         PagesHbox.addWidget(self.addPagesLbl)
         
         self.bookStatus = QComboBox(self)
-        self.bookStatus.addItems(["To-read", "Currently-Reading", "Read"])
+        self.bookStatus.addItems(["to-read", "currently-reading", "read"])
         
         #Choose book to update progress on
         self.combo = QComboBox(self) 
@@ -239,12 +241,17 @@ class ReadingApp(QMainWindow):
     def openFileDialog(self): 
         '''Opens a Goodreads shelf, extracts book id, title, author, page number,
         publication year, ISBN, ISBN13'''
+        createTable = True
         
         if self.combo.count()>0:
             index = self.combo.count()
         else:
             index = 0
         fname = QFileDialog.getOpenFileName(self, 'Import a goodreads bookshelf', '/home')
+
+        if len(self.tabledata)>0:
+            createTable = False
+
 
         if fname[0]:
             with open(fname[0], mode='r', encoding="utf8") as csv_file:
@@ -263,23 +270,37 @@ class ReadingApp(QMainWindow):
                         title = f'{row["Title"]}'
                         author = f'{row["Author"]}'
                         pages = f'{row["Number of Pages"]}'
+                        if pages != "":
+                            pages = int(pages)
+                        elif pages == "":
+                            pages = 1
+                        
                         year = f'{row["Original Publication Year"]}'
+                        if year != "":
+                            year = int(year)
+                        elif year == "":
+                            year = 1
                         ISBN = f'{row["ISBN"]}'
                         ISBN13 = f'{row["ISBN13"]}'
                         Bookshelves = f'{row["Bookshelves"]}'
+                        if "to-read" in Bookshelves: ###Remove all random bookshelves in goodreads
+                            Bookshelves = "to-read"
+                        elif "currently-reading" in Bookshelves:
+                            Bookshelves = "currently-reading"
+                        else:
+                            Bookshelves = "read"
+                            
                         dateRead = f'{row["Date Read"]}'
                         myReview = f'{row["My Review"]}'
                         self.changeShelfCombo.addItem(str(title))
                         index = index + 1
-                        
-                        
-                        
-                        
-                        
+
                         book_dict = {"Book Id" : id_num, "Title" : title, "Author" : author, 
                                      "Number of Pages" : pages, "Bookshelves" : Bookshelves,
                          "Original Publication Year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index,
                          "Date Read": dateRead, "My Review": myReview}
+                        row_data = [index, title, author, pages, Bookshelves, year] #Also makes a list of lists version
+                        self.tabledata.append(row_data) #appends to tabledata
                         if "currently-reading" in Bookshelves: 
                             #Adds only books on currently reading list to combo box
                             self.combo.addItem(str(title))
@@ -289,26 +310,16 @@ class ReadingApp(QMainWindow):
                             self.booksReadShelf.append(book_dict)
                 print(f'Processed {line_count} lines.')
                 print (len(self.booksReadShelf))
-        self.get_table_data() #Create list of bookshelf data
-        self.table = self.createTable() #Creates the table
-        self.shelfBox.addWidget(self.table) #Adds table to second tab
         
-                
-        #model = PandasModel(self.bookShelf)
-        #self.bookTable.setModel(model)
-    def get_table_data(self):
-        self.tabledata = []
-        for i in range(len(self.bookShelf)):
-            index = self.bookShelf[i]['id']
-            title = self.bookShelf[i]['Title']
-            author = self.bookShelf[i]['Author']
-            pages = self.bookShelf[i]['Number of Pages']
-            bookshelves = self.bookShelf[i]['Bookshelves']
-            publication = self.bookShelf[i]['Original Publication Year']
-            row_data = [index, title, author, pages, bookshelves, publication]
-            self.tabledata.append(row_data)
+        '''create & add table of the bookshelf if it does not exist already, 
+        else update existing table'''
+        if createTable != False:
+            self.table = self.createTable() #Creates the table
+            self.shelfBox.addWidget(self.table) #Adds table to second tab
+        else:
+            self.table.model().layoutChanged.emit()
+        
 
-        #print(self.tabledata)
                 
     def createTable(self):
         # create the view
@@ -323,7 +334,7 @@ class ReadingApp(QMainWindow):
         tv.setMinimumSize(400, 300)
 
         # hide grid
-        tv.setShowGrid(False)
+        tv.setShowGrid(True)
 
         # hide vertical header
         vh = tv.verticalHeader()
@@ -340,7 +351,7 @@ class ReadingApp(QMainWindow):
         tv.resizeRowsToContents()
 
         # enable sorting
-        tv.setSortingEnabled(False)
+        tv.setSortingEnabled(True)
 
         return tv   
                 
@@ -370,12 +381,25 @@ class ReadingApp(QMainWindow):
                                 "Number of Pages": pages_new, "Bookshelves": bookStatus}
             self.bookShelf.append(newBookEntry)
             self.changeShelfCombo.addItem(str(title_new))
+            if pages_new != "":
+                pages_new = int(pages_new)
+            elif pages_new == "":
+                pages_new = 1
+            row_data = [id_num, title_new, author_new, int(pages_new), bookStatus, ""] #Also makes a list of lists version
+            self.tabledata.append(row_data) #appends to tabledata
+            
             if "currently-reading" in bookStatus.lower(): 
                 #Only books currently to read is added to combo widget
                 self.combo.addItem(str(title_new))
                 self.currentlyReadingShelf.append(newBookEntry)
                 print (self.currentlyReadingShelf)
-            
+            if len(self.tabledata)>1:
+                self.table.model().layoutChanged.emit()
+            elif len(self.tabledata)==1:
+                self.table = self.createTable() #Creates the table
+                self.shelfBox.addWidget(self.table) #Adds table to second tab
+                
+                
         elif title_new == "" and author_new != "":
             self.added_book.setText("Please add the author")
         elif title_new != "" and author_new == "":
@@ -559,7 +583,14 @@ class MyTableModel(QAbstractTableModel):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return QVariant(self.headerdata[col])
         return QVariant()  
-
+    def sort(self, Ncol, order):
+        """Sort table by given column number.
+        """
+        self.layoutAboutToBeChanged.emit()
+        self.arraydata = sorted(self.arraydata, key=operator.itemgetter(Ncol))        
+        if order == Qt.DescendingOrder:
+            self.arraydata.reverse()
+        self.layoutChanged.emit()
 
     
 
