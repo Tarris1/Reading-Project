@@ -9,7 +9,7 @@ import sys
 import csv
 import operator
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget,
-                             QAction,QVBoxLayout, QHBoxLayout,
+                             QAction,QVBoxLayout, QHBoxLayout, QTextEdit,
                              QLabel, QLineEdit, QPushButton, QTabWidget,
                              qApp, QInputDialog, QFileDialog, QComboBox, QTableView, QTableWidget, QTableWidgetItem)
                              
@@ -65,6 +65,50 @@ class ReadingApp(QMainWindow):
         self.changeShelfBtn = QPushButton('Change Shelf', self)
         self.changeShelfBtn.clicked.connect(self.changeShelfFunc)
         
+        #Filter functionality
+        self.filterBox = QHBoxLayout()
+        
+        self.filterEditBoxOne = QVBoxLayout()
+        self.filterEditBoxComboOne = QVBoxLayout()
+        
+        self.filterEditBoxTwo = QVBoxLayout()
+        self.filterEditBoxComboTwo = QVBoxLayout()
+        
+        self.filterEditPagesOne = QLineEdit(self)
+        self.filterEditPagesTwo = QLineEdit(self)
+        self.filterEditPagesOneCombo = QComboBox(self)
+        self.filterEditPagesTwoCombo = QComboBox(self)
+        self.filterEditPagesLbl = QLabel("Select range of pages")
+        self.filterEditYearOne = QLineEdit(self)
+        self.filterEditYearTwo = QLineEdit(self)
+        self.filterEditYearOneCombo = QComboBox(self)
+        self.filterEditYearTwoCombo = QComboBox(self)
+        self.filterEditYearLbl = QLabel("Select range of publication years")
+        
+        self.filterEditBoxOne.addWidget(self.filterEditPagesOne)
+        self.filterEditBoxOne.addWidget(self.filterEditYearOne)
+        self.filterEditBoxComboOne.addWidget(self.filterEditPagesOneCombo)
+        self.filterEditBoxComboOne.addWidget(self.filterEditYearOneCombo)
+        
+        self.filterEditBoxTwo.addWidget(self.filterEditPagesTwo)
+        self.filterEditBoxTwo.addWidget(self.filterEditYearTwo)
+        self.filterEditBoxComboTwo.addWidget(self.filterEditPagesTwoCombo)
+        self.filterEditBoxComboTwo.addWidget(self.filterEditYearTwoCombo)
+        
+        self.filterBtn = QPushButton("Click here to filter")
+        
+        
+        self.filterLabelBox = QVBoxLayout()
+        self.filterLabelBox.addWidget(self.filterEditPagesLbl)
+        self.filterLabelBox.addWidget(self.filterEditYearLbl)
+        
+        self.filterBox.addLayout(self.filterLabelBox)
+        self.filterBox.addLayout(self.filterEditBoxOne)
+        self.filterBox.addLayout(self.filterEditBoxComboOne)
+        
+        self.filterBox.addLayout(self.filterEditBoxTwo)
+        self.filterBox.addLayout(self.filterEditBoxComboTwo)
+        #self.filterBox.addWidget(self.filterBtn)
         
         #Entry lines and labels
         self.addTitle = QLineEdit()
@@ -132,14 +176,12 @@ class ReadingApp(QMainWindow):
         statisticsBox.addWidget(self.statisticsLbl)
         statisticsBox.addStretch(1)
         
-        
-        self.testButton = QPushButton("test")
-        self.testButton.clicked.connect(self.test)
-        
+        ##2nd Tab
         self.shelfBox = QVBoxLayout()
         self.shelfBox.addLayout(self.changeShelfBox)
-
-        #self.shelfBox.addStretch(1)
+        self.shelfBox.addLayout(self.filterBox)
+        self.shelfBox.addWidget(self.filterBtn)
+        self.shelfBox.addStretch(1)
         
         
         
@@ -410,11 +452,13 @@ class ReadingApp(QMainWindow):
         '''Clears the bookshelf list, tells the user that shelf is cleared if a bookshelf existed before,
         else tells the user that a bookshelf, clears combo box'''
         self.bookShelf = []
+        self.tabledata = []
         if len(self.combo.currentText()) >0:
             self.added_book.setText("Your shelf is now cleared. Please add books")
         else:
             self.added_book.setText("A bookshelf has been created. Please add books to your new bookshelf.")
         self.combo.clear()
+        self.table.model().layoutChanged.emit()
         
             
     def addProgress(self, index):
@@ -543,10 +587,6 @@ class ReadingApp(QMainWindow):
         self.statisticsLbl.setText("You have a read a total of " + str(page_read) + 
                                    " pages since you started reading.")
         
-    def test(self):
-        self.tabledata.append([1,1,1,1,1])
-        self.table.model().layoutChanged.emit()
-        print ('success')
 
 from PyQt5.QtCore import *
   
