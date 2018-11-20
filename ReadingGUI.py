@@ -10,10 +10,12 @@ import csv
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget,
                              QAction,QVBoxLayout, QHBoxLayout,
                              QLabel, QLineEdit, QPushButton, QTabWidget,
-                             qApp, QInputDialog, QFileDialog, QComboBox)
+                             qApp, QInputDialog, QFileDialog, QComboBox, QTableView, QTableWidget, QTableWidgetItem)
                              
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QDateTime
+from PyQt5.QtGui import QIcon, QStandardItemModel
+from PyQt5.QtCore import QDateTime, QAbstractTableModel
+
+
 
 class ReadingApp(QMainWindow):
     def __init__(self):
@@ -60,6 +62,7 @@ class ReadingApp(QMainWindow):
         self.changeShelfTo.addItems(["to-read", "currently-reading", "read"])
         self.changeShelfBtn = QPushButton('Change Shelf', self)
         self.changeShelfBtn.clicked.connect(self.changeShelfFunc)
+        
         
         #Entry lines and labels
         self.addTitle = QLineEdit()
@@ -127,18 +130,25 @@ class ReadingApp(QMainWindow):
         statisticsBox.addWidget(self.statisticsLbl)
         statisticsBox.addStretch(1)
         
-        shelfBox = QVBoxLayout()
-        shelfBox.addLayout(self.changeShelfBox)
-        shelfBox.addStretch(1)
+        
+        self.testButton = QPushButton("test")
+        self.testButton.clicked.connect(self.test)
+        
+        self.shelfBox = QVBoxLayout()
+        self.shelfBox.addLayout(self.changeShelfBox)
+
+        #self.shelfBox.addStretch(1)
+        
+        
         
         self.layout = QVBoxLayout(self)
         
+        #Create tabs and QTabWidget
         self.addBookTab = QWidget()
         self.yourBookShelf = QWidget()
         self.statisticsTab = QWidget()
         self.tabs = QTabWidget()
         self.tabs.setMovable(True)
-        
         
         #set layout of tab 1
         self.addBookTab.layout = QVBoxLayout()
@@ -147,7 +157,7 @@ class ReadingApp(QMainWindow):
         
         #set layout of tab 2
         self.yourBookShelf.layout = QVBoxLayout()
-        self.yourBookShelf.layout.addLayout(shelfBox)
+        self.yourBookShelf.layout.addLayout(self.shelfBox)
         self.yourBookShelf.setLayout(self.yourBookShelf.layout)
         
         #set layout of tab 3
@@ -264,6 +274,8 @@ class ReadingApp(QMainWindow):
                         
                         
                         
+                        
+                        
                         book_dict = {"Book Id" : id_num, "Title" : title, "Author" : author, 
                                      "Number of Pages" : pages, "Bookshelves" : Bookshelves,
                          "Original Publication Year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index,
@@ -277,9 +289,60 @@ class ReadingApp(QMainWindow):
                             self.booksReadShelf.append(book_dict)
                 print(f'Processed {line_count} lines.')
                 print (len(self.booksReadShelf))
-
-                
+        self.get_table_data() #Create list of bookshelf data
+        self.table = self.createTable() #Creates the table
+        self.shelfBox.addWidget(self.table) #Adds table to second tab
         
+                
+        #model = PandasModel(self.bookShelf)
+        #self.bookTable.setModel(model)
+    def get_table_data(self):
+        self.tabledata = []
+        for i in range(len(self.bookShelf)):
+            index = self.bookShelf[i]['id']
+            title = self.bookShelf[i]['Title']
+            author = self.bookShelf[i]['Author']
+            pages = self.bookShelf[i]['Number of Pages']
+            bookshelves = self.bookShelf[i]['Bookshelves']
+            publication = self.bookShelf[i]['Original Publication Year']
+            row_data = [index, title, author, pages, bookshelves, publication]
+            self.tabledata.append(row_data)
+
+        #print(self.tabledata)
+                
+    def createTable(self):
+        # create the view
+        tv = QTableView()
+
+        # set the table model
+        header = ['id', 'Title', 'Author', 'Number of Pages', 'Bookshelves', 'Original Publication Year']
+        tablemodel = MyTableModel(self.tabledata, header, self)
+        tv.setModel(tablemodel)
+
+        # set the minimum size
+        tv.setMinimumSize(400, 300)
+
+        # hide grid
+        tv.setShowGrid(False)
+
+        # hide vertical header
+        vh = tv.verticalHeader()
+        vh.setVisible(False)
+
+        # set horizontal header properties
+        hh = tv.horizontalHeader()
+        hh.setStretchLastSection(True)
+
+        # set column width to fit contents
+        tv.resizeColumnsToContents()
+
+        # set row height
+        tv.resizeRowsToContents()
+
+        # enable sorting
+        tv.setSortingEnabled(False)
+
+        return tv   
                 
     def onActivated(self, text):
         
@@ -455,7 +518,52 @@ class ReadingApp(QMainWindow):
                     page_read = page_read+int(booksToAnalyze[i]["Number of Pages"])
         self.statisticsLbl.setText("You have a read a total of " + str(page_read) + 
                                    " pages since you started reading.")
+        
+    def test(self):
+        self.tabledata.append([1,1,1,1,1])
+        self.table.model().layoutChanged.emit()
+        print ('success')
+
+from PyQt5.QtCore import *
+  
+class MyTableModel(QAbstractTableModel):
+    def __init__(self, datain, headerdata, parent=None):
+        """
+        Args:
+            datain: a list of lists\n
+            headerdata: a list of strings
+        """
+        QAbstractTableModel.__init__(self, parent)
+        self.arraydata = datain
+        self.headerdata = headerdata
+
+    def rowCount(self, parent):
+        return len(self.arraydata)
+
+    def columnCount(self, parent):
+        if len(self.arraydata) > 0: 
+            return len(self.arraydata[0]) 
+        return 0
+
+    def data(self, index, role):
+        if not index.isValid():
+            return QVariant()
+        elif role != Qt.DisplayRole:
+            return QVariant()
+        return QVariant(self.arraydata[index.row()][index.column()])
+
+    def setData(self, index, value, role):
+        pass         # not sure what to put here
+        
+    def headerData(self, col, orientation, role):
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return QVariant(self.headerdata[col])
+        return QVariant()  
+
+
     
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
