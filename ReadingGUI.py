@@ -363,21 +363,21 @@ class ReadingApp(QMainWindow):
         '''create & add table of the bookshelf if it does not exist already, 
         else update existing table'''
         if createTable != False:
-            self.table = self.createTable() #Creates the table
+            self.table = self.createTable(self.tabledata) #Creates the table
             self.shelfBox.addWidget(self.table) #Adds table to second tab
         else:
             self.table.model().layoutChanged.emit()
         
 
                 
-    def createTable(self):
+    def createTable(self, data):
         # create the view
         tv = QTableView()
 
         # set the table model
         self.header = ['id', 'Title', 'Author', 'Number of Pages', 'Bookshelves', 'Original Publication Year']
-        tablemodel = MyTableModel(self.tabledata, self.header, self)
-        tv.setModel(tablemodel)
+        self.tableModel = MyTableModel(data, self.header, self)
+        tv.setModel(self.tableModel)
 
         # set the minimum size
         tv.setMinimumSize(400, 300)
@@ -445,7 +445,7 @@ class ReadingApp(QMainWindow):
             if len(self.tabledata)>1:
                 self.table.model().layoutChanged.emit()
             elif len(self.tabledata)==1:
-                self.table = self.createTable() #Creates the table
+                self.table = self.createTable(self.tabledata) #Creates the table
                 self.shelfBox.addWidget(self.table) #Adds table to second tab
                 
                 
@@ -635,8 +635,9 @@ class ReadingApp(QMainWindow):
                 if self.tabledata[i][3] < pagesOne:
                     self.filteredData.append(self.tabledata[i])
         
-        newModel = MyTableModel(self.filteredData, self.header, self)
-        self.table.setModel(newModel)
+        newModel = self.createTable(self.filteredData)
+        #newModel = MyTableModel(self.filteredData, self.header, self)
+        self.table.setModel(self.tableModel)
         self.table.model().layoutChanged.emit()
         
 
