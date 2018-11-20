@@ -373,7 +373,7 @@ class ReadingApp(QMainWindow):
     def createTable(self, data):
         # create the view
         tv = QTableView()
-
+        colWidth = 8
         # set the table model
         self.header = ['id', 'Title', 'Author', 'Number of Pages', 'Bookshelves', 'Original Publication Year']
         self.tableModel = MyTableModel(data, self.header, self)
@@ -395,6 +395,7 @@ class ReadingApp(QMainWindow):
 
         # set column width to fit contents
         tv.resizeColumnsToContents()
+        tv.setColumnWidth(1, colWidth)
 
         # set row height
         tv.resizeRowsToContents()
@@ -603,8 +604,14 @@ class ReadingApp(QMainWindow):
         filtPagesTwo = self.filterEditPagesTwoCombo.currentText()
         filtYearOne = self.filterEditYearOneCombo.currentText()
         filtYearTwo = self.filterEditYearTwoCombo.currentText()
-        pagesOne = int(self.filterEditPagesOne.displayText())
-        pagesTwo = int(self.filterEditPagesTwo.displayText())
+        if self.filterEditPagesOne.displayText() != "":
+            pagesOne = int(self.filterEditPagesOne.displayText())
+        else:
+            pagesOne = ""
+        if self.filterEditPagesTwo.displayText() != "":
+            pagesTwo = int(self.filterEditPagesTwo.displayText())
+        else: 
+            pagesTwo = ""
         yearOne = self.filterEditYearOne.displayText()
         yearTwo = self.filterEditYearTwo.displayText()
         filters = [filtPagesOne, filtPagesTwo, filtYearOne, filtYearTwo]
@@ -614,87 +621,92 @@ class ReadingApp(QMainWindow):
         #3rd position is pages, 5th position is publication year
         #Filter works fine, but table doesnt update - probably data is unchanged
         #self.table.model().layoutAboutToBeChanged.emit()
-        for i in range(len(self.tabledata)):
-            if filtPagesOne == ">=":
-                if int(self.tabledata[i][3]) >= pagesOne:
-                    if filtPagesTwo == ">=":
-                        if int(self.tabledata[i][3]) >= pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "=":
-                        if int(self.tabledata[i][3]) == pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == ">":
-                        if int(self.tabledata[i][3]) > pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "<=":
-                        if int(self.tabledata[i][3]) <= pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "<":
-                        if int(self.tabledata[i][3]) < pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
+        
+        '''Massive filter'''
+        if pagesOne != "" or pagesTwo != "":
+            for i in range(len(self.tabledata)):
+                if filtPagesOne == ">=":
+                    if int(self.tabledata[i][3]) >= pagesOne:
+                        if filtPagesTwo == ">=":
+                            if int(self.tabledata[i][3]) >= pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "=":
+                            if int(self.tabledata[i][3]) == pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == ">":
+                            if int(self.tabledata[i][3]) > pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "<=":
+                            if int(self.tabledata[i][3]) <= pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "<":
+                            if int(self.tabledata[i][3]) < pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
                     
-            if filtPagesOne == "=":
-                if self.tabledata[i][3] == pagesOne:
-                    self.filteredData.append(self.tabledata[i])
+                if filtPagesOne == "=" or filtPagesTwo == "=":
+                    if self.tabledata[i][3] == pagesOne or self.tabledata[i][3] == pagesTwo:
+                        self.filteredData.append(self.tabledata[i])
             
-            if filtPagesOne == ">":
-                if self.tabledata[i][3] > pagesOne:
-                    if filtPagesTwo == ">=":
-                        if int(self.tabledata[i][3]) >= pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "=":
-                        if int(self.tabledata[i][3]) == pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == ">":
-                        if int(self.tabledata[i][3]) > pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "<=":
-                        if int(self.tabledata[i][3]) <= pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "<":
-                        if int(self.tabledata[i][3]) < pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
+                if filtPagesOne == ">":
+                    if self.tabledata[i][3] > pagesOne:
+                        if filtPagesTwo == ">=":
+                            if int(self.tabledata[i][3]) >= pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "=":
+                            if int(self.tabledata[i][3]) == pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == ">":
+                            if int(self.tabledata[i][3]) > pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "<=":
+                            if int(self.tabledata[i][3]) <= pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "<":
+                            if int(self.tabledata[i][3]) < pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
                     
-            if filtPagesOne == "<=":
-                if self.tabledata[i][3] <= pagesOne:
-                    if filtPagesTwo == ">=":
-                        if int(self.tabledata[i][3]) >= pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "=":
-                        if int(self.tabledata[i][3]) == pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == ">":
-                        if int(self.tabledata[i][3]) > pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "<=":
-                        if int(self.tabledata[i][3]) <= pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "<":
-                        if int(self.tabledata[i][3]) < pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
+                if filtPagesOne == "<=":
+                    if self.tabledata[i][3] <= pagesOne:
+                        if filtPagesTwo == ">=":
+                            if int(self.tabledata[i][3]) >= pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "=":
+                            if int(self.tabledata[i][3]) == pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == ">":
+                            if int(self.tabledata[i][3]) > pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "<=":
+                            if int(self.tabledata[i][3]) <= pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "<":
+                            if int(self.tabledata[i][3]) < pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
             
-            if filtPagesOne == "<":
-                if self.tabledata[i][3] < pagesOne:
-                    if filtPagesTwo == ">=":
-                        if int(self.tabledata[i][3]) >= pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "=":
-                        if int(self.tabledata[i][3]) == pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == ">":
-                        if int(self.tabledata[i][3]) > pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "<=":
-                        if int(self.tabledata[i][3]) <= pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
-                    if filtPagesTwo == "<":
-                        if int(self.tabledata[i][3]) < pagesTwo:
-                            self.filteredData.append(self.tabledata[i])
+                if filtPagesOne == "<":
+                    if self.tabledata[i][3] < pagesOne:
+                        if filtPagesTwo == ">=":
+                            if int(self.tabledata[i][3]) >= pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "=":
+                            if int(self.tabledata[i][3]) == pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == ">":
+                            if int(self.tabledata[i][3]) > pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "<=":
+                            if int(self.tabledata[i][3]) <= pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                        if filtPagesTwo == "<":
+                            if int(self.tabledata[i][3]) < pagesTwo:
+                                self.filteredData.append(self.tabledata[i])
+                                
         #newModel = 
-        self.createTable(self.filteredData)
+        if len(self.filteredData)>0:
+            self.createTable(self.filteredData)
         #newModel = MyTableModel(self.filteredData, self.header, self)
-        self.table.setModel(self.tableModel)
-        self.table.model().layoutChanged.emit()
+            self.table.setModel(self.tableModel)
+            self.table.model().layoutChanged.emit()
         
 
 from PyQt5.QtCore import *
