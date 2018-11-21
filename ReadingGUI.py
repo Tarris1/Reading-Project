@@ -185,7 +185,7 @@ class ReadingApp(QMainWindow):
         ##2nd Tab
         self.shelfBox = QVBoxLayout()
         self.shelfBox.addLayout(self.changeShelfBox)
-        self.shelfBox.addStretch(1)
+        #self.shelfBox.addStretch(1)
         self.shelfBox.addLayout(self.filterBox)
         self.shelfBox.addWidget(self.filterBtn)
         #self.shelfBox.addStretch(1)
@@ -623,106 +623,54 @@ class ReadingApp(QMainWindow):
         filters = [filtPagesOne, filtPagesTwo, filtYearOne, filtYearTwo]
         ranges = [pagesOne, pagesTwo, yearOne, yearTwo]
         print (ranges)
-            
         #3rd position is pages, 5th position is publication year
-        
         #self.table.model().layoutAboutToBeChanged.emit()
-                                
-        self.filterDouble(self.tabledata, pagesOne, pagesTwo, filtPagesOne, filtPagesTwo, 3)
-        self.filterDouble(self.tabledata, yearOne, yearTwo, filtYearOne, filtYearTwo, 5)
+        ###Filter only works if all data is entered for some reason
+       ###Filter pages       
+        if pagesOne != "":                  
+            self.filter(self.tabledata, pagesOne, filtPagesOne, 3)
+        if pagesTwo != "":
+            self.filter(self.tabledata,pagesTwo, filtPagesTwo, 3)
+        ###filter year
+        if yearOne != "":
+            self.filter(self.tabledata, yearOne, filtYearOne, 5)
+        if yearTwo != "":
+            self.filter(self.tabledata, yearTwo, filtYearTwo, 5)
         
             
-        if len(self.filteredData)>0:
+        if len(self.filteredData)>0: ###Ensures that no update to table happens if a filter is initiated without data#
             self.createTable(self.filteredData)
             self.table.setModel(self.tableModel)
             self.table.model().layoutChanged.emit()
-  
-    def filterDouble(self, data, rangeOne,rangeTwo, filterOne, filterTwo, loc):
+        
+    def filter (self, data, rangeOne, filterOne, loc):
+        '''filters the data with constraint filterOne and rangeOne'''
         if len(self.filteredData) >0:
             data = self.filteredData
             self.filteredData = []
-            
         pagesOne = rangeOne
-        pagesTwo = rangeTwo
         filtPagesOne = filterOne
-        filtPagesTwo = filterTwo
-        if pagesOne != "" or pagesTwo != "":
+        if pagesOne != "":
             for i in range(len(data)):
                 if filtPagesOne == ">=":
                     if int(data[i][loc]) >= pagesOne:
-                        if filtPagesTwo == ">=":
-                            if int(data[i][loc]) >= pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "=":
-                            if int(data[i][loc]) == pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == ">":
-                            if int(data[i][loc]) > pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "<=":
-                            if int(data[i][loc]) <= pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "<":
-                            if int(data[i][loc]) < pagesTwo:
-                                self.filteredData.append(data[i])
-                    
-                if filtPagesOne == "=" or filtPagesTwo == "=":
-                    if data[i][loc] == pagesOne or data[i][loc] == pagesTwo:
                         self.filteredData.append(data[i])
-            
+                
+                if filtPagesOne == "=":
+                    if data[i][loc] == pagesOne:
+                        self.filteredData.append(data[i])
+                        
                 if filtPagesOne == ">":
                     if data[i][loc] > pagesOne:
-                        if filtPagesTwo == ">=":
-                            if int(data[i][loc]) >= pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "=":
-                            if int(data[i][loc]) == pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == ">":
-                            if int(data[i][loc]) > pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "<=":
-                            if int(data[i][loc]) <= pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "<":
-                            if int(data[i][loc]) < pagesTwo:
-                                self.filteredData.append(data[i])
-                    
+                        self.filteredData.append(data[i])
+                        
                 if filtPagesOne == "<=":
                     if data[i][loc] <= pagesOne:
-                        if filtPagesTwo == ">=":
-                            if int(data[i][loc]) >= pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "=":
-                            if int(data[i][loc]) == pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == ">":
-                            if int(data[i][loc]) > pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "<=":
-                            if int(data[i][loc]) <= pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "<":
-                            if int(data[i][loc]) < pagesTwo:
-                                self.filteredData.append(data[i])
-            
+                        self.filteredData.append(data[i])
+                
                 if filtPagesOne == "<":
                     if data[i][loc] < pagesOne:
-                        if filtPagesTwo == ">=":
-                            if int(data[i][loc]) >= pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "=":
-                            if int(data[i][loc]) == pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == ">":
-                            if int(data[i][loc]) > pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "<=":
-                            if int(data[i][loc]) <= pagesTwo:
-                                self.filteredData.append(data[i])
-                        if filtPagesTwo == "<":
-                            if int(data[i][loc]) < pagesTwo:
-                                self.filteredData.append(data[i])
+                        self.filteredData.append(data[i])
       
 
 from PyQt5.QtCore import *
