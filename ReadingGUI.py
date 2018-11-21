@@ -9,11 +9,11 @@ import sys
 import csv
 import operator
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget,
-                             QAction,QVBoxLayout, QHBoxLayout, QTextEdit,
+                             QAction,QVBoxLayout, QHBoxLayout,
                              QLabel, QLineEdit, QPushButton, QTabWidget,
-                             qApp, QInputDialog, QFileDialog, QComboBox, QTableView, QTableWidget, QTableWidgetItem)
+                             qApp, QInputDialog, QFileDialog, QComboBox, QTableView)
                              
-from PyQt5.QtGui import QIcon, QStandardItemModel
+from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QDateTime, QAbstractTableModel
 
 
@@ -190,8 +190,7 @@ class ReadingApp(QMainWindow):
         self.shelfBox.addWidget(self.filterBtn)
         #self.shelfBox.addStretch(1)
         
-        
-        
+
         self.layout = QVBoxLayout(self)
         
         #Create tabs and QTabWidget
@@ -225,11 +224,7 @@ class ReadingApp(QMainWindow):
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
         self.setCentralWidget(self.tabs)
-        
-        #tab1 = QWidget(self) #First Tab
-        #self.setCentralWidget(tab1)
-        #tab1.setLayout(mainColumn)
-        ####################
+ 
         
         ###MenuBar#######
         exitAct = QAction(QIcon('exit24.png'), '&Exit', self)
@@ -262,7 +257,6 @@ class ReadingApp(QMainWindow):
         fileMenu.addAction(exitAct)
         ###########################
         
-        
         #Show widgets
         self.setWindowIcon(QIcon('readinglogo.jpg'))
         
@@ -272,7 +266,6 @@ class ReadingApp(QMainWindow):
         self.height = self.width
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.setWindowTitle("Reading & Me")
-        
         
         self.show()
     
@@ -321,14 +314,14 @@ class ReadingApp(QMainWindow):
                         pages = f'{row["Number of Pages"]}'
                         if pages != "":
                             pages = int(pages)
-                        elif pages == "":
-                            pages = 1
+                        else:
+                            pages = 0
                         
                         year = f'{row["Original Publication Year"]}'
                         if year != "":
                             year = int(year)
                         elif year == "":
-                            year = 1
+                            year = 0
                         ISBN = f'{row["ISBN"]}'
                         ISBN13 = f'{row["ISBN13"]}'
                         Bookshelves = f'{row["Bookshelves"]}'
@@ -364,9 +357,15 @@ class ReadingApp(QMainWindow):
         else update existing table'''
         if createTable != False:
             self.table = self.createTable(self.tabledata) #Creates the table
+            self.table.setModel(self.tableModel)
+            #self.table.model().layoutChanged.emit()
             self.shelfBox.addWidget(self.table) #Adds table to second tab
-        else:
+        elif createTable == False:
+            self.createTable(self.tabledata)
+            self.table.setModel(self.tableModel)
             self.table.model().layoutChanged.emit()
+            ##self.table = self.createTable(self.tabledata)
+            #self.table.model().layoutChanged.emit()
         
 
                 
@@ -435,8 +434,9 @@ class ReadingApp(QMainWindow):
                 pages_new = int(pages_new)
             elif pages_new == "":
                 pages_new = 1
-            row_data = [id_num, title_new, author_new, int(pages_new), bookStatus, ""] #Also makes a list of lists version
-            data.append(row_data) #appends to tabledata
+            row_data = [id_num, title_new, author_new, int(pages_new), bookStatus, 0] #Also makes a list of lists version
+            self.tabledata.append(row_data) #appends to tabledata
+            
             
             if "currently-reading" in bookStatus.lower(): 
                 #Only books currently to read is added to combo widget
@@ -444,6 +444,8 @@ class ReadingApp(QMainWindow):
                 self.currentlyReadingShelf.append(newBookEntry)
                 print (self.currentlyReadingShelf)
             if len(self.tabledata)>1:
+                self.createTable(self.tabledata)
+                self.table.setModel(self.tableModel)
                 self.table.model().layoutChanged.emit()
             elif len(self.tabledata)==1:
                 self.table = self.createTable(self.tabledata) #Creates the table
@@ -582,19 +584,7 @@ class ReadingApp(QMainWindow):
         else:
             self.updatedBookLbl.setText("")    
         
-    def bookStatistics(self):
-        '''Prints out statistics'''
-        booksToAnalyze = self.bookShelf
-        page_read = 0
-        ###Extract books read:
-        for i in range(len(booksToAnalyze)):
-            bookShelves = booksToAnalyze[i]["Bookshelves"]
-            if not ("currently-reading") in bookShelves and not ("to-read") in bookShelves or "Read" in bookShelves:
-                pageOfBookI = booksToAnalyze[i]["Number of Pages"]
-                if len(pageOfBookI)>0:
-                    page_read = page_read+int(booksToAnalyze[i]["Number of Pages"])
-        self.statisticsLbl.setText("You have a read a total of " + str(page_read) + 
-                                   " pages since you started reading.")
+    
         
     def filterTableFunc(self):
         '''filters the data table and updates table'''
@@ -623,9 +613,9 @@ class ReadingApp(QMainWindow):
         filters = [filtPagesOne, filtPagesTwo, filtYearOne, filtYearTwo]
         ranges = [pagesOne, pagesTwo, yearOne, yearTwo]
         print (ranges)
+        
         #3rd position is pages, 5th position is publication year
         #self.table.model().layoutAboutToBeChanged.emit()
-        ###Filter only works if all data is entered for some reason
        ###Filter pages       
         if pagesOne != "":                  
             self.filter(self.tabledata, pagesOne, filtPagesOne, 3)
@@ -672,6 +662,17 @@ class ReadingApp(QMainWindow):
                     if data[i][loc] < pagesOne:
                         self.filteredData.append(data[i])
       
+    def bookStatistics(self):
+        '''Prints out statistics'''
+        booksToAnalyze = self.bookShelf
+        page_read = 0
+        ###Extract books read:
+        for i in range(len(booksToAnalyze)):
+            bookShelves = booksToAnalyze[i]["Bookshelves"]
+            if not ("currently-reading") in bookShelves and not ("to-read") in bookShelves or "Read" in bookShelves:
+                page_read = page_read+int(booksToAnalyze[i]["Number of Pages"])
+        self.statisticsLbl.setText("You have a read a total of " + str(page_read) + 
+                                   " pages since you started reading.")
 
 from PyQt5.QtCore import *
   
@@ -716,10 +717,6 @@ class MyTableModel(QAbstractTableModel):
         if order == Qt.DescendingOrder:
             self.arraydata.reverse()
         self.layoutChanged.emit()
-
-    
-
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
