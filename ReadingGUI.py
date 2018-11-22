@@ -674,18 +674,9 @@ class ReadingApp(QMainWindow):
     def bookStatistics(self):
         '''Prints out statistics'''
         booksToAnalyze = self.bookShelf
-        page_read = 0
-        ###Extract books read:
-        for i in range(len(booksToAnalyze)):
-            bookShelves = booksToAnalyze[i]["Bookshelves"]
-            if not ("currently-reading") in bookShelves and not ("to-read") in bookShelves or "Read" in bookShelves:
-                page_read = page_read+int(booksToAnalyze[i]["Number of Pages"])
-        self.statisticsLbl.setText("You have a read a total of " + str(page_read) + 
-                                   " pages since you started reading.")
-        
         cumuPlotModel = []
         cumPages = 0
-        #QDates = []
+        ###Extract books read:
         for i in range(len(booksToAnalyze)):
             if booksToAnalyze[i]["Bookshelves"] == "read":
                 dateRead = booksToAnalyze[i]["Date Read"]
@@ -697,6 +688,16 @@ class ReadingApp(QMainWindow):
                     day = int(dateRead [1])
                     month = int(dateRead[0])
                     cumuPlotModel.append([page, QDate(year, month, day), cumPages])
+        latestBookDate = cumuPlotModel[len(cumuPlotModel)-1][1] #Date of last book
+        firstBookDate = cumuPlotModel[0][1] #Date of first book
+        daysRead = latestBookDate.daysTo(firstBookDate) #Difference in days
+        self.statisticsLbl.setText("You have a read a total of " + str(cumPages) + 
+                                   " pages since you started reading. This is the equivalent of " +
+                                   str(round(cumPages/daysRead)) + 
+                                   " pages every day since you finished your first book.")
+        
+        
+        #QDates = []
                      
         #print(cumuPlotModel)
 
