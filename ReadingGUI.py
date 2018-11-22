@@ -32,6 +32,7 @@ class ReadingApp(QMainWindow):
         self.currentlyReadingShelf = [] #Initiate currently reading shelf
         self.booksReadShelf = [] #Initiate read books shelf
         self.tabledata = [] #Initiate table data list
+        self.bookShelfCleared = False
         
         ##################Widgets##################
         self.btn_progress = QPushButton('Update Progress', self) #Add Progress button
@@ -355,12 +356,12 @@ class ReadingApp(QMainWindow):
         
         '''create & add table of the bookshelf if it does not exist already, 
         else update existing table'''
-        if createTable != False:
+        if createTable != False & self.bookShelfCleared == False:
             self.table = self.createTable(self.tabledata) #Creates the table
             self.table.setModel(self.tableModel)
             #self.table.model().layoutChanged.emit()
             self.shelfBox.addWidget(self.table) #Adds table to second tab
-        elif createTable == False:
+        elif createTable == False or self.bookShelfCleared == True:
             self.createTable(self.tabledata)
             self.table.setModel(self.tableModel)
             self.table.model().layoutChanged.emit()
@@ -461,8 +462,16 @@ class ReadingApp(QMainWindow):
     def newShelf(self):
         '''Clears the bookshelf list, tells the user that shelf is cleared if a bookshelf existed before,
         else tells the user that a bookshelf, clears combo box'''
-        self.bookShelf = []
-        self.tabledata = []
+        self.bookShelf = [] #Reinitiate bookshelf list
+        self.updates = [] #Reinitiate update list
+        self.currentlyReadingShelf = [] #Reinitiate currently reading shelf
+        self.booksReadShelf = [] #Reinitiate read books shelf
+        self.tabledata = [] #Reinitiate table data list
+        self.createTable(self.tabledata)
+        self.table.setModel(self.tableModel)
+        self.table.model().layoutChanged.emit()
+        self.changeShelfCombo.clear()
+        self.bookShelfCleared = True
         if len(self.combo.currentText()) >0:
             self.added_book.setText("Your shelf is now cleared. Please add books")
         else:
@@ -673,6 +682,23 @@ class ReadingApp(QMainWindow):
                 page_read = page_read+int(booksToAnalyze[i]["Number of Pages"])
         self.statisticsLbl.setText("You have a read a total of " + str(page_read) + 
                                    " pages since you started reading.")
+        
+        cumuPlotModel = []
+        cumPages = 0
+        #QDates = []
+        for i in range(len(booksToAnalyze)):
+            if booksToAnalyze[i]["Bookshelves"] == "read":
+                dateRead = booksToAnalyze[i]["Date Read"]
+                if dateRead != "":
+                    page = booksToAnalyze[i]["Number of Pages"]
+                    cumPages = cumPages+page
+                    dateRead = dateRead.split("/")
+                    year = int(dateRead[2])
+                    day = int(dateRead [1])
+                    month = int(dateRead[0])
+                    cumuPlotModel.append([page, QDate(year, month, day), cumPages])
+                     
+        #print(cumuPlotModel)
 
 from PyQt5.QtCore import *
   
