@@ -26,15 +26,16 @@ class ReadingApp(QMainWindow):
         self.initUI()
         
     def initUI(self):
-        
+        ######Initiate basic variables
         self.bookShelf = [] #Initiate bookshelf list
         self.updates = [] #Initiate update list
         self.currentlyReadingShelf = [] #Initiate currently reading shelf
         self.booksReadShelf = [] #Initiate read books shelf
         self.tabledata = [] #Initiate table data list
         self.bookShelfCleared = False
+        self.filteredData = []
         
-        ##################Widgets##################
+        ##################First tab widgets##################
         self.btn_progress = QPushButton('Update Progress', self) #Add Progress button
         self.btn_progress.setToolTip('Update your reading progress')
         self.btn_progress.clicked.connect(self.addProgress)
@@ -53,11 +54,11 @@ class ReadingApp(QMainWindow):
         self.statisticsButton.clicked.connect(self.bookStatistics)
         self.statisticsLbl = QLabel("", self)
         
-        self.changeShelfBtn = QPushButton('Change Shelf', self)
-        
         self.add_booksLbl = QLabel("Add the details of the new book below:", self)
         self.added_book = QLabel('', self) #Label indicating added book 
         
+        
+        #####Second Tab Widget#########
         #Change Shelf widgets
         self.changeShelfLbl = QLabel("Change shelf of book")
         self.changeShelfCombo = QComboBox(self)
@@ -118,7 +119,7 @@ class ReadingApp(QMainWindow):
         
         self.filterBox.addLayout(self.filterEditBoxTwo)
         self.filterBox.addLayout(self.filterEditBoxComboTwo)
-        #self.filterBox.addWidget(self.filterBtn)
+        ##################################################
         
         #Entry lines and labels
         self.addTitle = QLineEdit()
@@ -196,36 +197,36 @@ class ReadingApp(QMainWindow):
         self.layout = QVBoxLayout(self) #Creates baseline layout
         
         #Create tabs and QTabWidget
-        self.addBookTab = QWidget()
-        self.yourBookShelf = QWidget()
-        self.statisticsTab = QWidget()
-        self.tabs = QTabWidget()
-        self.tabs.setMovable(True)
+        self.addBookTab = QWidget() #First tab
+        self.yourBookShelf = QWidget() #Second tab
+        self.statisticsTab = QWidget() #Third tab
+        self.tabs = QTabWidget() #QTab Widget which will contain tab
+        self.tabs.setMovable(True) #Allows for a reordering of tabs
         
         #set layout of tab 1
-        self.addBookTab.layout = QVBoxLayout()
+        self.addBookTab.layout = QVBoxLayout() #Add a layout for tab 1
         self.addBookTab.layout.addLayout(mainColumn)      
         self.addBookTab.setLayout(self.addBookTab.layout)
         
         #set layout of tab 2
-        self.yourBookShelf.layout = QVBoxLayout()
+        self.yourBookShelf.layout = QVBoxLayout() #add a layout for tab 2
         self.yourBookShelf.layout.addLayout(self.shelfBox)
         self.yourBookShelf.setLayout(self.yourBookShelf.layout)
         
         #set layout of tab 3
-        self.statisticsTab.layout = QVBoxLayout()
+        self.statisticsTab.layout = QVBoxLayout() #add a Layout for tab 3
         self.statisticsTab.layout.addLayout(statisticsBox)
         self.statisticsTab.setLayout(self.statisticsTab.layout)
         
         #Add tabs to window
-        self.tabs.addTab(self.addBookTab, "Add Books")
-        self.tabs.addTab(self.yourBookShelf, "Your bookshelf")
-        self.tabs.addTab(self.statisticsTab, "Reading Statistics")
+        self.tabs.addTab(self.addBookTab, "Add Books") #Add tab 1 to the QTab widget
+        self.tabs.addTab(self.yourBookShelf, "Your bookshelf") #Add tab 2 to the QTab widget
+        self.tabs.addTab(self.statisticsTab, "Reading Statistics") #Add tab 3 to the QTab widget
         
 
-        self.layout.addWidget(self.tabs)
-        self.setLayout(self.layout)
-        self.setCentralWidget(self.tabs)
+        self.layout.addWidget(self.tabs) #Adds the tab to baseline layout
+        self.setLayout(self.layout) #Sets the layout to the GUI
+        self.setCentralWidget(self.tabs) 
  
         
         ###MenuBar#######
@@ -249,8 +250,10 @@ class ReadingApp(QMainWindow):
         newFile.setStatusTip ('Create a new bookshelf')
         newFile.triggered.connect(self.newShelf)
         
+        #Initiate statusbar
         self.statusBar()
         
+        #Creates a menubar and adds menu and actions to menu
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(newFile)
@@ -271,29 +274,19 @@ class ReadingApp(QMainWindow):
         
         self.show()
     
-    
-    def showDialog(self): #Dialog function 
-        
-        text, ok = QInputDialog.getText(self, 'Input Dialog',  #Dialog title, Dialog message
-            'Enter a new Book Title:') #Returns text and a boolean value (TRUE or FALSE)
-        
-        if ok:
-            self.added_book.setText("You have just added " + str(text) + " to your reading list") 
-            #Sets text of QLabel
-            self.combo.addItem(str(text)) ###Adds another menu for added book.
             
     def openFileDialog(self): 
         '''Opens a Goodreads shelf, extracts book id, title, author, page number,
         publication year, ISBN, ISBN13'''
         createTable = True
         
-        if self.combo.count()>0:
-            index = self.combo.count()
-        else:
-            index = 0
-        fname = QFileDialog.getOpenFileName(self, 'Import a goodreads bookshelf', '/home')
-
         if len(self.tabledata)>0:
+            index = len(self.tabledata)
+        else:
+            index = 0 #If no books exist in the app already, initiate index = 0
+        fname = QFileDialog.getOpenFileName(self, 'Import a goodreads bookshelf', '/home') #Opens QFileDialog
+
+        if len(self.tabledata)>0: #If a table already exists, dont recreate one; amend existing one "update"
             createTable = False
 
 
@@ -305,26 +298,26 @@ class ReadingApp(QMainWindow):
                 for row in csv_reader:
                     if line_count == 0:
                         col_names = (f'Column names are {", ".join(row)}')
-                        print (col_names)
+                        print (col_names) #Prints all potential columns to extract data from for reference
                         line_count += 1
                     else:
             #print(f'\t{row["Book Id"]} works in the {row["Title"]} department, and was born in {row["Author"]}.')
                         line_count += 1
-                        id_num = (f'{row["Book Id"]}')
+                        id_num = (f'{row["Book Id"]}') #Takes goodreads' ID of the book
                         title = f'{row["Title"]}'
                         author = f'{row["Author"]}'
                         pages = f'{row["Number of Pages"]}'
                         if pages != "":
-                            pages = int(pages)
+                            pages = int(pages) #Ensures that the page numbers are integers
                         else:
-                            pages = 0
+                            pages = 0 #If no page number exists, set it as 0.
                         
                         year = f'{row["Original Publication Year"]}'
                         if year != "":
-                            year = int(year)
+                            year = int(year) #Same as with page number above
                         elif year == "":
                             year = 0
-                        ISBN = f'{row["ISBN"]}'
+                        ISBN = f'{row["ISBN"]}' 
                         ISBN13 = f'{row["ISBN13"]}'
                         Bookshelves = f'{row["Bookshelves"]}'
                         if "to-read" in Bookshelves: ###Remove all random bookshelves in goodreads
@@ -343,15 +336,16 @@ class ReadingApp(QMainWindow):
                                      "Number of Pages" : pages, "Bookshelves" : Bookshelves,
                          "Original Publication Year" : year, "ISBN": ISBN, "ISBN13": ISBN13, "id": index,
                          "Date Read": dateRead, "My Review": myReview}
-                        row_data = [index, title, author, pages, Bookshelves, year] #Also makes a list of lists version
+                        row_data = [index, title, author, pages, Bookshelves, year] 
+                        #Also makes a list of lists version ^
                         self.tabledata.append(row_data) #appends to tabledata
                         if "currently-reading" in Bookshelves: 
                             #Adds only books on currently reading list to combo box
                             self.combo.addItem(str(title))
                             self.currentlyReadingShelf.append(book_dict)
-                        self.bookShelf.append(book_dict) #Adds to combo bar
+                        self.bookShelf.append(book_dict) #Adds the dictionary to bookshelf list
                         if dateRead != "":
-                            self.booksReadShelf.append(book_dict)
+                            self.booksReadShelf.append(book_dict) #Adds already-read books to booksRead shelf
                 print(f'Processed {line_count} lines.')
                 print (len(self.booksReadShelf))
         
@@ -361,7 +355,7 @@ class ReadingApp(QMainWindow):
             self.table = self.createTable(self.tabledata) #Creates the table
             self.table.setModel(self.tableModel)
             #self.table.model().layoutChanged.emit()
-            self.shelfBox.addWidget(self.table) #Adds table to second tab
+            self.shelfBox.addWidget(self.table) #Adds table to second tab 
         elif createTable == False or self.bookShelfCleared == True:
             self.createTable(self.tabledata)
             self.table.setModel(self.tableModel)
@@ -435,7 +429,7 @@ class ReadingApp(QMainWindow):
             if pages_new != "":
                 pages_new = int(pages_new)
             elif pages_new == "":
-                pages_new = 1
+                pages_new = 0
             row_data = [id_num, title_new, author_new, int(pages_new), bookStatus, 0] #Also makes a list of lists version
             self.tabledata.append(row_data) #appends to tabledata
             
@@ -468,6 +462,7 @@ class ReadingApp(QMainWindow):
         self.currentlyReadingShelf = [] #Reinitiate currently reading shelf
         self.booksReadShelf = [] #Reinitiate read books shelf
         self.tabledata = [] #Reinitiate table data list
+
         self.createTable(self.tabledata)
         self.table.setModel(self.tableModel)
         self.table.model().layoutChanged.emit()
@@ -798,6 +793,8 @@ class MyTableModel(QAbstractTableModel):
         return QVariant(self.arraydata[index.row()][index.column()])
 
     def setData(self, index, value, role):
+     #   self.__data[index.row()][index.column()] = value
+       # return True
         pass         # not sure what to put here
         
     def headerData(self, col, orientation, role):
@@ -812,6 +809,7 @@ class MyTableModel(QAbstractTableModel):
         if order == Qt.DescendingOrder:
             self.arraydata.reverse()
         self.layoutChanged.emit()
+    
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
