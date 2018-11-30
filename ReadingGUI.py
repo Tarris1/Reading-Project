@@ -103,6 +103,8 @@ class ReadingApp(QMainWindow):
         
         self.filterBtn = QPushButton("Click here to filter")
         self.filterBtn.clicked.connect(self.filterTableFunc)
+        
+        self.filterExpBtn = QPushButton("Click here to export filtered shelf")
         ###################################
         
         self.filterLabelBox = QVBoxLayout()
@@ -185,10 +187,11 @@ class ReadingApp(QMainWindow):
         
         ##2nd Tab
         self.shelfBox = QVBoxLayout()
-        self.shelfBox.addLayout(self.changeShelfBox)
+        #self.shelfBox.addLayout(self.changeShelfBox)
         #self.shelfBox.addStretch(1)
         self.shelfBox.addLayout(self.filterBox)
         self.shelfBox.addWidget(self.filterBtn)
+        self.shelfBox.addWidget(self.filterExpBtn)
         #self.shelfBox.addStretch(1)
         
 
@@ -674,8 +677,11 @@ class ReadingApp(QMainWindow):
     def bookStatistics(self):
         '''Prints out statistics'''
         booksToAnalyze = self.bookShelf
-        cumuPlotModel = []
+        cumuPlotModel = [] #List with 3 data points, pages of finished book, date when the book was finished and cumulated pages up to that point
         cumPages = 0
+        months = ["January", "February", "March", "April", "May", "June", "July", "August",
+                  "September", "October", "November", "December"]
+        
         ###Extract books read:
         for i in range(len(booksToAnalyze)):
             if booksToAnalyze[i]["Bookshelves"] == "read":
@@ -688,6 +694,8 @@ class ReadingApp(QMainWindow):
                     day = int(dateRead [1])
                     month = int(dateRead[0])
                     cumuPlotModel.append([page, QDate(year, month, day), cumPages])
+                    
+                    
         latestBookDate = cumuPlotModel[len(cumuPlotModel)-1][1] #Date of last book
         firstBookDate = cumuPlotModel[0][1] #Date of first book
         daysRead = latestBookDate.daysTo(firstBookDate) #Difference in days
@@ -696,6 +704,33 @@ class ReadingApp(QMainWindow):
                                    str(round(cumPages/daysRead)) + 
                                    " pages every day since you finished your first book.")
         
+        #Year reading distribution
+        
+        
+        allYearsModel = []
+        allMonthsYearsModel = []
+        years = [2012, 2013, 2014, 2015, 2016, 2017, 2018]
+        month = [1,2,3,4,5,6,7,8,9,10,11,12]
+        #cumulatedPagesEachYear = []
+        #cumulatedPagesEachMonth = []
+        #years = 2012
+        
+        for years in years:
+            yearMonth = []
+            year = 0
+            for months in months:
+                month = 0
+                for i in range(len(cumuPlotModel)):
+                    if cumuPlotModel[i][1].year() == years and cumuPlotModel[i][1].month() == months:
+                        year = year + cumuPlotModel[i][0]
+                        month = month + cumuPlotModel[i][0]
+                yearMonth.append(month)
+            allYearsModel.append(year)
+            allMonthsYearsModel.append(yearMonth)
+        print (allMonthsYearsModel)
+        print (allYearsModel)
+            
+            
         
         #QDates = []
                      
