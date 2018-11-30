@@ -105,6 +105,7 @@ class ReadingApp(QMainWindow):
         self.filterBtn.clicked.connect(self.filterTableFunc)
         
         self.filterExpBtn = QPushButton("Click here to export filtered shelf")
+        self.filterExpBtn.clicked.connect(self.filterExpFunc)
         ###################################
         
         self.filterLabelBox = QVBoxLayout()
@@ -187,15 +188,12 @@ class ReadingApp(QMainWindow):
         
         ##2nd Tab
         self.shelfBox = QVBoxLayout()
-        #self.shelfBox.addLayout(self.changeShelfBox)
-        #self.shelfBox.addStretch(1)
+        #self.shelfBox.addLayout(self.changeShelfBox) Shelf change functionality -> not that useful
         self.shelfBox.addLayout(self.filterBox)
         self.shelfBox.addWidget(self.filterBtn)
         self.shelfBox.addWidget(self.filterExpBtn)
-        #self.shelfBox.addStretch(1)
-        
 
-        self.layout = QVBoxLayout(self)
+        self.layout = QVBoxLayout(self) #Creates baseline layout
         
         #Create tabs and QTabWidget
         self.addBookTab = QWidget()
@@ -673,7 +671,42 @@ class ReadingApp(QMainWindow):
                 if filtPagesOne == "<":
                     if data[i][loc] < pagesOne:
                         self.filteredData.append(data[i])
-      
+    
+    def filterExpFunc(self):
+        '''Exports the filtered list into a CSV file'''
+        data = self.filteredData
+        if len(self.filteredData)==0:
+            print ("No Filter has been selected")
+            
+        else:
+            dataDict = []
+            for i in range(len(data)):
+                id_number = data[i][0]
+                title = data[i][1]
+                author = data[i][2]
+                pages = data[i][3]
+                bookShelves = data[i][4]
+                pubDate = data[i][5]
+                iData = {'id': id_number, 'Title': title, 'Author': author, 'Number of Pages': pages,
+                    'Original Publication Year': pubDate, 'Bookshelves': bookShelves}
+                dataDict.append(iData)
+            
+            
+            
+            save = QFileDialog.getSaveFileName(self, 'Save filtered table', '/home')
+        
+            if save[0]:
+                with open(save[0]+'.csv', mode='w', encoding = "utf8", newline='') as csv_file:
+                    fieldnames = ['id', 'Title', 'Author', 'Number of Pages', 
+                                  'Original Publication Year', 
+                                  "Bookshelves"]
+                    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+                    writer.writeheader()
+                    for i in range(len(dataDict)):
+                        writer.writerow(dataDict[i])
+            
+ 
+    
     def bookStatistics(self):
         '''Prints out statistics'''
         booksToAnalyze = self.bookShelf
