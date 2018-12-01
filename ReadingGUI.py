@@ -648,14 +648,20 @@ class ReadingApp(QMainWindow):
             self.filter(self.tabledata, yearTwo, filtYearTwo, 5)
             
         if self.filterTitle.displayText() != "":
-            data = self.filteredData
+            if len(self.filteredData)>0:
+                data = self.filteredData
+            else:
+                data = self.tabledata
             self.filteredData = []
             for i in range(len(data)):
                 if self.filterTitle.displayText() in data[i][1]:
                     self.filteredData.append(data[i])
         
         if self.filterAuthor.displayText() != "":
-            data = self.filteredData
+            if len(self.filteredData)>0:
+                data = self.filteredData
+            else:
+                data = self.tabledata
             self.filteredData = []
             for i in range(len(data)):
                 if self.filterAuthor.displayText() in data[i][2]:
