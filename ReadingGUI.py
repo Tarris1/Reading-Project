@@ -107,6 +107,18 @@ class ReadingApp(QMainWindow):
         
         self.filterExpBtn = QPushButton("Click here to export filtered shelf")
         self.filterExpBtn.clicked.connect(self.filterExpFunc)
+        
+        self.filterTitleBox = QHBoxLayout()
+        self.filterTitleLbl = QLabel("Search for a title")
+        self.filterTitle = QLineEdit(self)
+        self.filterTitleBox.addWidget(self.filterTitleLbl)
+        self.filterTitleBox.addWidget(self.filterTitle)
+        
+        self.filterAuthorBox = QHBoxLayout()
+        self.filterAuthorLbl = QLabel("Search for an author")
+        self.filterAuthor = QLineEdit(self)
+        self.filterAuthorBox.addWidget(self.filterAuthorLbl)
+        self.filterAuthorBox.addWidget(self.filterAuthor)
         ###################################
         
         self.filterLabelBox = QVBoxLayout()
@@ -191,6 +203,8 @@ class ReadingApp(QMainWindow):
         self.shelfBox = QVBoxLayout()
         #self.shelfBox.addLayout(self.changeShelfBox) Shelf change functionality -> not that useful
         self.shelfBox.addLayout(self.filterBox)
+        self.shelfBox.addLayout(self.filterTitleBox)
+        self.shelfBox.addLayout(self.filterAuthorBox)
         self.shelfBox.addWidget(self.filterBtn)
         self.shelfBox.addWidget(self.filterExpBtn)
 
@@ -599,6 +613,7 @@ class ReadingApp(QMainWindow):
         filtPagesTwo = self.filterEditPagesTwoCombo.currentText()
         filtYearOne = self.filterEditYearOneCombo.currentText()
         filtYearTwo = self.filterEditYearTwoCombo.currentText()
+        
         if self.filterEditPagesOne.displayText() != "":
             pagesOne = int(self.filterEditPagesOne.displayText())
         else:
@@ -631,7 +646,20 @@ class ReadingApp(QMainWindow):
             self.filter(self.tabledata, yearOne, filtYearOne, 5)
         if yearTwo != "":
             self.filter(self.tabledata, yearTwo, filtYearTwo, 5)
+            
+        if self.filterTitle.displayText() != "":
+            data = self.filteredData
+            self.filteredData = []
+            for i in range(len(data)):
+                if self.filterTitle.displayText() in data[i][1]:
+                    self.filteredData.append(data[i])
         
+        if self.filterAuthor.displayText() != "":
+            data = self.filteredData
+            self.filteredData = []
+            for i in range(len(data)):
+                if self.filterAuthor.displayText() in data[i][2]:
+                    self.filteredData.append(data[i])
             
         if len(self.filteredData)>0: ###Ensures that no update to table happens if a filter is initiated without data#
             self.createTable(self.filteredData)
