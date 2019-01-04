@@ -752,18 +752,21 @@ class ReadingApp(QMainWindow):
                     page = booksToAnalyze[i]["Number of Pages"]
                     cumPages = cumPages+page
                     dateRead = dateRead.split("/")
-                    year = int(dateRead[2])
-                    day = int(dateRead [1])
-                    month = int(dateRead[0])
+                    year = int(dateRead[0])
+                    day = int(dateRead [2])
+                    month = int(dateRead[1])
                     cumuPlotModel.append([page, QDate(year, month, day), cumPages])
                     
                     
         latestBookDate = cumuPlotModel[len(cumuPlotModel)-1][1] #Date of last book
         firstBookDate = cumuPlotModel[0][1] #Date of first book
         daysRead = latestBookDate.daysTo(firstBookDate) #Difference in days
+        daysReadSinceStarted = 0
+        if daysRead != 0: 
+            daysReadSinceStarted = str(round(cumPages/daysRead))
         self.statisticsLbl.setText("You have a read a total of " + str(cumPages) + 
-                                   " pages since you started reading. This is the equivalent of " +
-                                   str(round(cumPages/daysRead)) + 
+                                 " pages since you started reading. This is the equivalent of " +
+                                  str(daysReadSinceStarted) + 
                                    " pages every day since you finished your first book.")
         
         #Year reading distribution
@@ -791,8 +794,7 @@ class ReadingApp(QMainWindow):
             allMonthsYearsModel.append(yearMonth)
         print (allMonthsYearsModel)
         print (allYearsModel)
-            
-            
+        
         
         #QDates = []
                      
