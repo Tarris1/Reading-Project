@@ -770,30 +770,37 @@ class ReadingApp(QMainWindow):
                                    " pages every day since you finished your first book.")
         
         #Year reading distribution
-        
-        
-        allYearsModel = []
-        allMonthsYearsModel = []
         years = [2012, 2013, 2014, 2015, 2016, 2017, 2018]
         month = [1,2,3,4,5,6,7,8,9,10,11,12]
-        #cumulatedPagesEachYear = []
-        #cumulatedPagesEachMonth = []
-        #years = 2012
+        cumulatedPagesEachYear = []
+        cumulatedPagesEachMonth = []
         
-        for years in years:
-            yearMonth = []
-            year = 0
-            for months in months:
-                month = 0
-                for i in range(len(cumuPlotModel)):
-                    if cumuPlotModel[i][1].year() == years and cumuPlotModel[i][1].month() == months:
-                        year = year + cumuPlotModel[i][0]
-                        month = month + cumuPlotModel[i][0]
-                yearMonth.append(month)
-            allYearsModel.append(year)
-            allMonthsYearsModel.append(yearMonth)
-        print (allMonthsYearsModel)
-        print (allYearsModel)
+        for yearDigit in range(len(years)): ###Starts with year 1 in the years list
+            yearSpecific = years[yearDigit]
+            
+            yearCumulated = 0 ####Initiates tracking of pages read in given year
+            
+            for monthDigit in range(len(month)): ###Goes through each month
+                monthSpecific = month[monthDigit]
+                monthCumulated = 0 #Initiates tracking of pgs read in given month
+                for i in range(len(cumuPlotModel)): #Goes through each book read
+                    yearI = cumuPlotModel[i][1].year()
+                    monthI = cumuPlotModel[i][1].month()
+                    
+                    if yearI == yearSpecific and monthI == monthSpecific: 
+                        pgs = cumuPlotModel[i][0]
+                        yearCumulated = yearCumulated + pgs
+                        monthCumulated = monthCumulated+pgs
+                        
+                    
+                    
+                cumulatedPagesEachMonth.append(monthCumulated)
+            cumulatedPagesEachYear.append(yearCumulated)
+        
+        
+        
+        print (cumulatedPagesEachYear)
+        print (cumulatedPagesEachMonth)
         
         
         #QDates = []
